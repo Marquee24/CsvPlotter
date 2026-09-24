@@ -1,0 +1,952 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>OpenTK.Compute</name>
+    </assembly>
+    <members>
+        <member name="T:OpenTK.Compute.Native.CLBase">
+            <summary>
+            This is a base class for OpenCL APIs that are using DllImport and want to resolve different dll names on different platforms.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.Native.CLBase.RegisterOpenCLResolver">
+            <summary>
+            This needs to be called before trying to use any OpenCL functions.
+            This should be done in the static constructor of any class that DllImports OpenCL functions.
+            </summary>
+        </member>
+        <member name="T:OpenTK.Compute.Native.CLLoader">
+            <summary>
+            Provides a base for ApiContext so that it can register dll intercepts.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetPlatformIds(System.UInt32,OpenTK.Compute.OpenCL.CLPlatform[],System.UInt32@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            See more: https://www.khronos.org/registry/OpenCL/sdk/2.2/docs/man/html/clGetPlatformIDs.html.
+            </summary>
+            <param name="numberOfEntries">number of <see cref="T:OpenTK.Compute.OpenCL.CLPlatform"/> entries that can be added to platforms. If platforms is not NULL, numberOfEntries must be greater than zero.</param>
+            <param name="platforms">returns a list of OpenCL platforms found. The CLPlatform values returned in platforms can be used to identify a specific OpenCL platform. If platforms is NULL, this argument is ignored. The number of OpenCL platforms returned is the minimum of the value specified by numberOfEntries or the number of OpenCL platforms available.</param>
+            <param name="numberOfPlatforms">returns the number of OpenCL platforms available. If numberOfPlatforms is NULL, this argument is ignored.</param>
+            <returns>returns <see cref="F:OpenTK.Compute.OpenCL.CLResultCode.Success"/> if the function is executed successfully. Otherwise, it returns one of the following errors:
+            -InvalidValue if numberOfEntries is equal to zero and platforms is not NULL or if both numberOfPlatforms and platforms are NULL.
+            -OutOfHostMemory if there is a failure to allocate resources required by the OpenCL implementation on the host.</returns>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetPlatformIds(OpenTK.Compute.OpenCL.CLPlatform[]@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+            <param name="platformIds">returns a list of OpenCL platforms found. The CLPlatform values returned in platforms can be used to identify a specific OpenCL platform.</param>
+            <returns>returns Success if the function is executed successfully. Otherwise, it returns one of the following errors:
+            -InvalidValue if numberOfEntries is equal to zero and platforms is not NULL or if both numberOfPlatforms and platforms are NULL.
+            -OutOfHostMemory if there is a failure to allocate resources required by the OpenCL implementation on the host.</returns>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetPlatformInfo(OpenTK.Compute.OpenCL.CLPlatform,OpenTK.Compute.OpenCL.PlatformInfo,System.UIntPtr,System.Byte[],System.UIntPtr@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetPlatformInfo(OpenTK.Compute.OpenCL.CLPlatform,OpenTK.Compute.OpenCL.PlatformInfo,System.Byte[]@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetDeviceIds(OpenTK.Compute.OpenCL.CLPlatform,OpenTK.Compute.OpenCL.DeviceType,System.UInt32,OpenTK.Compute.OpenCL.CLDevice[],System.UInt32@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetDeviceIds(OpenTK.Compute.OpenCL.CLPlatform,OpenTK.Compute.OpenCL.DeviceType,OpenTK.Compute.OpenCL.CLDevice[]@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetDeviceInfo(OpenTK.Compute.OpenCL.CLDevice,OpenTK.Compute.OpenCL.DeviceInfo,System.UIntPtr,System.Byte[],System.UIntPtr@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetDeviceInfo(OpenTK.Compute.OpenCL.CLDevice,OpenTK.Compute.OpenCL.DeviceInfo,System.Byte[]@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreateSubDevices(OpenTK.Compute.OpenCL.CLDevice,System.IntPtr[],System.UInt32,OpenTK.Compute.OpenCL.CLDevice[],System.UInt32@)">
+            <summary>
+            Introduced in OpenCL 1.2.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.RetainDevice(OpenTK.Compute.OpenCL.CLDevice)">
+            <summary>
+            Introduced in OpenCL 1.2.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.ReleaseDevice(OpenTK.Compute.OpenCL.CLDevice)">
+            <summary>
+            Introduced in OpenCL 1.2.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.SetDefaultDeviceCommandQueue(OpenTK.Compute.OpenCL.CLContext,OpenTK.Compute.OpenCL.CLDevice,OpenTK.Compute.OpenCL.CLCommandQueue)">
+            <summary>
+            Introduced in OpenCL 2.1.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetDeviceAndHostTimer(OpenTK.Compute.OpenCL.CLDevice,System.IntPtr,System.IntPtr)">
+            <summary>
+            Introduced in OpenCL 2.1.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetHostTimer(OpenTK.Compute.OpenCL.CLDevice,System.IntPtr)">
+            <summary>
+            Introduced in OpenCL 2.1.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreateContext(System.IntPtr,System.UInt32,OpenTK.Compute.OpenCL.CLDevice[],System.IntPtr,System.IntPtr,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreateContext(System.IntPtr,OpenTK.Compute.OpenCL.CLDevice[],System.IntPtr,System.IntPtr,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreateContext(System.IntPtr[],System.UInt32,OpenTK.Compute.OpenCL.CLDevice[],System.IntPtr,System.IntPtr,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreateContext(System.IntPtr[],OpenTK.Compute.OpenCL.CLDevice[],System.IntPtr,System.IntPtr,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreateContextFromType(System.IntPtr,OpenTK.Compute.OpenCL.DeviceType,System.IntPtr,System.IntPtr,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreateContextFromType(System.IntPtr[],OpenTK.Compute.OpenCL.DeviceType,System.IntPtr,System.IntPtr,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.RetainContext(OpenTK.Compute.OpenCL.CLContext)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.ReleaseContext(OpenTK.Compute.OpenCL.CLContext)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetContextInfo(OpenTK.Compute.OpenCL.CLContext,OpenTK.Compute.OpenCL.ContextInfo,System.UIntPtr,System.Byte[],System.UIntPtr@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetContextInfo(OpenTK.Compute.OpenCL.CLContext,OpenTK.Compute.OpenCL.ContextInfo,System.Byte[]@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreateCommandQueueWithProperties(OpenTK.Compute.OpenCL.CLContext,System.IntPtr,System.IntPtr,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 2.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.RetainCommandQueue(OpenTK.Compute.OpenCL.CLCommandQueue)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.ReleaseCommandQueue(OpenTK.Compute.OpenCL.CLCommandQueue)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetCommandQueueInfo(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CommandQueueInfo,System.UIntPtr,System.Byte[],System.UIntPtr@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetCommandQueueInfo(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CommandQueueInfo,System.Byte[]@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreateBuffer(OpenTK.Compute.OpenCL.CLContext,OpenTK.Compute.OpenCL.MemoryFlags,System.UIntPtr,System.IntPtr,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreateBuffer``1(OpenTK.Compute.OpenCL.CLContext,OpenTK.Compute.OpenCL.MemoryFlags,``0[],OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreateBuffer``1(OpenTK.Compute.OpenCL.CLContext,OpenTK.Compute.OpenCL.MemoryFlags,System.Span{``0},OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreateSubBuffer(OpenTK.Compute.OpenCL.CLBuffer,OpenTK.Compute.OpenCL.MemoryFlags,OpenTK.Compute.OpenCL.BufferCreateType,System.IntPtr,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 1.1.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreateImage(OpenTK.Compute.OpenCL.CLContext,OpenTK.Compute.OpenCL.MemoryFlags,OpenTK.Compute.OpenCL.ImageFormat@,OpenTK.Compute.OpenCL.ImageDescription@,System.IntPtr,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 1.2.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreatePipe(OpenTK.Compute.OpenCL.CLContext,OpenTK.Compute.OpenCL.MemoryFlags,System.UInt32,System.UInt32,System.IntPtr[],OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 2.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.RetainMemoryObject(System.IntPtr)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.RetainMemoryObject(OpenTK.Compute.OpenCL.CLBuffer)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.RetainMemoryObject(OpenTK.Compute.OpenCL.CLImage)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.RetainMemoryObject(OpenTK.Compute.OpenCL.CLPipe)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.ReleaseMemoryObject(System.IntPtr)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.ReleaseMemoryObject(OpenTK.Compute.OpenCL.CLBuffer)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.ReleaseMemoryObject(OpenTK.Compute.OpenCL.CLImage)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.ReleaseMemoryObject(OpenTK.Compute.OpenCL.CLPipe)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetSupportedImageFormats(OpenTK.Compute.OpenCL.CLContext,OpenTK.Compute.OpenCL.MemoryFlags,OpenTK.Compute.OpenCL.MemoryObjectType,System.UInt32,OpenTK.Compute.OpenCL.ImageFormat[],System.UInt32@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetSupportedImageFormats(OpenTK.Compute.OpenCL.CLContext,OpenTK.Compute.OpenCL.MemoryFlags,OpenTK.Compute.OpenCL.MemoryObjectType,OpenTK.Compute.OpenCL.ImageFormat[]@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetMemObjectInfo(System.IntPtr,OpenTK.Compute.OpenCL.MemoryObjectInfo,System.UIntPtr,System.Byte[],System.UIntPtr@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetMemObjectInfo(OpenTK.Compute.OpenCL.CLBuffer,OpenTK.Compute.OpenCL.MemoryObjectInfo,System.UIntPtr,System.Byte[],System.UIntPtr@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetMemObjectInfo(OpenTK.Compute.OpenCL.CLImage,OpenTK.Compute.OpenCL.MemoryObjectInfo,System.UIntPtr,System.Byte[],System.UIntPtr@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetMemObjectInfo(OpenTK.Compute.OpenCL.CLPipe,OpenTK.Compute.OpenCL.MemoryObjectInfo,System.UIntPtr,System.Byte[],System.UIntPtr@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetMemObjectInfo(System.IntPtr,OpenTK.Compute.OpenCL.MemoryObjectInfo,System.Byte[]@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetMemObjectInfo(OpenTK.Compute.OpenCL.CLBuffer,OpenTK.Compute.OpenCL.MemoryObjectInfo,System.Byte[]@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetMemObjectInfo(OpenTK.Compute.OpenCL.CLImage,OpenTK.Compute.OpenCL.MemoryObjectInfo,System.Byte[]@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetMemObjectInfo(OpenTK.Compute.OpenCL.CLPipe,OpenTK.Compute.OpenCL.MemoryObjectInfo,System.Byte[]@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetImageInfo(OpenTK.Compute.OpenCL.CLImage,OpenTK.Compute.OpenCL.ImageInfo,System.UIntPtr,System.Byte[],System.UIntPtr@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetImageInfo(OpenTK.Compute.OpenCL.CLImage,OpenTK.Compute.OpenCL.ImageInfo,System.Byte[]@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetPipeInfo(OpenTK.Compute.OpenCL.CLPipe,OpenTK.Compute.OpenCL.PipeInfo,System.UIntPtr,System.Byte[],System.UIntPtr@)">
+            <summary>
+            Introduced in OpenCL 2.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetPipeInfo(OpenTK.Compute.OpenCL.CLPipe,OpenTK.Compute.OpenCL.PipeInfo,System.Byte[]@)">
+            <summary>
+            Introduced in OpenCL 2.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.SetMemoryObjectDestructorCallback(System.IntPtr,System.IntPtr,System.IntPtr)">
+            <summary>
+            Introduced in OpenCL 1.1.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.SetMemoryObjectDestructorCallback(OpenTK.Compute.OpenCL.CLBuffer,System.IntPtr,System.IntPtr)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.SetMemoryObjectDestructorCallback(OpenTK.Compute.OpenCL.CLImage,System.IntPtr,System.IntPtr)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.SetMemoryObjectDestructorCallback(OpenTK.Compute.OpenCL.CLPipe,System.IntPtr,System.IntPtr)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.SVMAlloc(OpenTK.Compute.OpenCL.CLContext,OpenTK.Compute.OpenCL.SvmMemoryFlags,System.UIntPtr,System.UInt32)">
+            <summary>
+            Introduced in OpenCL 2.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.SVMFree(OpenTK.Compute.OpenCL.CLContext,System.IntPtr)">
+            <summary>
+            Introduced in OpenCL 2.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreateSamplerWithProperties(OpenTK.Compute.OpenCL.CLContext,System.IntPtr,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 2.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.RetainSampler(OpenTK.Compute.OpenCL.CLSampler)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.ReleaseSampler(OpenTK.Compute.OpenCL.CLSampler)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetSamplerInfo(OpenTK.Compute.OpenCL.CLSampler,OpenTK.Compute.OpenCL.SamplerInfo,System.UIntPtr,System.Byte[],System.UIntPtr@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetSamplerInfo(OpenTK.Compute.OpenCL.CLSampler,OpenTK.Compute.OpenCL.SamplerInfo,System.Byte[]@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreateProgramWithSource(OpenTK.Compute.OpenCL.CLContext,System.UInt32,System.IntPtr[],System.UInt32[],OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreateProgramWithSource(OpenTK.Compute.OpenCL.CLContext,System.String,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreateProgramWithBinary(OpenTK.Compute.OpenCL.CLContext,System.UInt32,System.IntPtr[],System.UIntPtr[],System.IntPtr[],OpenTK.Compute.OpenCL.CLResultCode[]@,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreateProgramWithBuiltInKernels(OpenTK.Compute.OpenCL.CLContext,System.UInt32,System.IntPtr[],System.String,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 1.2.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreateProgramWithIL(OpenTK.Compute.OpenCL.CLContext,System.IntPtr,System.UIntPtr,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 2.1.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.RetainProgram(OpenTK.Compute.OpenCL.CLProgram)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.ReleaseProgram(OpenTK.Compute.OpenCL.CLProgram)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.BuildProgram(OpenTK.Compute.OpenCL.CLProgram,System.UInt32,OpenTK.Compute.OpenCL.CLDevice[],System.String,System.IntPtr,System.IntPtr)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.BuildProgram(OpenTK.Compute.OpenCL.CLProgram,OpenTK.Compute.OpenCL.CLDevice[],System.String,OpenTK.Compute.OpenCL.CL.ClEventCallback)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CompileProgram(OpenTK.Compute.OpenCL.CLProgram,System.UInt32,OpenTK.Compute.OpenCL.CLDevice[],System.String,System.UInt32,System.IntPtr[],System.IntPtr@,System.IntPtr,System.IntPtr)">
+            <summary>
+            Introduced in OpenCL 1.2.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.LinkProgram(OpenTK.Compute.OpenCL.CLContext,System.UInt32,OpenTK.Compute.OpenCL.CLDevice[],System.String,System.UInt32,OpenTK.Compute.OpenCL.CLProgram[],System.IntPtr,System.IntPtr,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 1.2.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.SetProgramReleaseCallback(OpenTK.Compute.OpenCL.CLProgram,System.IntPtr,System.IntPtr)">
+            <summary>
+            Introduced in OpenCL 2.2.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.SetProgramSpecializationConstant(OpenTK.Compute.OpenCL.CLProgram,System.UInt32,System.UIntPtr,System.IntPtr)">
+            <summary>
+            Introduced in OpenCL 2.2.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.UnloadPlatformCompiler(OpenTK.Compute.OpenCL.CLPlatform)">
+            <summary>
+            Introduced in OpenCL 1.2.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetProgramInfo(OpenTK.Compute.OpenCL.CLProgram,OpenTK.Compute.OpenCL.ProgramInfo,System.UIntPtr,System.Byte[],System.UIntPtr@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetProgramInfo(OpenTK.Compute.OpenCL.CLProgram,OpenTK.Compute.OpenCL.ProgramInfo,System.Byte[]@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetProgramBuildInfo(OpenTK.Compute.OpenCL.CLProgram,OpenTK.Compute.OpenCL.CLDevice,OpenTK.Compute.OpenCL.ProgramBuildInfo,System.UIntPtr,System.Byte[],System.UIntPtr@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetProgramBuildInfo(OpenTK.Compute.OpenCL.CLProgram,OpenTK.Compute.OpenCL.CLDevice,OpenTK.Compute.OpenCL.ProgramBuildInfo,System.Byte[]@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreateKernel(OpenTK.Compute.OpenCL.CLProgram,System.String,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreateKernelsInProgram(OpenTK.Compute.OpenCL.CLProgram,System.UInt32,OpenTK.Compute.OpenCL.CLKernel[],System.UInt32@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreateKernelsInProgram(OpenTK.Compute.OpenCL.CLProgram,OpenTK.Compute.OpenCL.CLKernel[]@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CloneKernel(OpenTK.Compute.OpenCL.CLKernel,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 2.1.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.RetainKernel(OpenTK.Compute.OpenCL.CLKernel)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.ReleaseKernel(OpenTK.Compute.OpenCL.CLKernel)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.SetKernelArg(OpenTK.Compute.OpenCL.CLKernel,System.UInt32,System.UIntPtr,System.IntPtr)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.SetKernelArg``1(OpenTK.Compute.OpenCL.CLKernel,System.UInt32,``0@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.SetKernelArgSVMPointer(OpenTK.Compute.OpenCL.CLKernel,System.UInt32,System.IntPtr)">
+            <summary>
+            Introduced in OpenCL 2.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.SetKernelExecInfo(OpenTK.Compute.OpenCL.CLKernel,OpenTK.Compute.OpenCL.KernelExecInfo,System.UIntPtr,System.IntPtr)">
+            <summary>
+            Introduced in OpenCL 2.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetKernelInfo(OpenTK.Compute.OpenCL.CLKernel,OpenTK.Compute.OpenCL.KernelInfo,System.UIntPtr,System.Byte[],System.UIntPtr@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetKernelInfo(OpenTK.Compute.OpenCL.CLKernel,OpenTK.Compute.OpenCL.KernelInfo,System.Byte[]@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetKernelArgInfo(OpenTK.Compute.OpenCL.CLKernel,System.UInt32,OpenTK.Compute.OpenCL.KernelArgInfo,System.UIntPtr,System.Byte[],System.UIntPtr@)">
+            <summary>
+            Introduced in OpenCL 1.2.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetKernelArgInfo(OpenTK.Compute.OpenCL.CLKernel,System.UInt32,OpenTK.Compute.OpenCL.KernelArgInfo,System.Byte[]@)">
+            <summary>
+            Introduced in OpenCL 1.2.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetKernelWorkGroupInfo(OpenTK.Compute.OpenCL.CLKernel,OpenTK.Compute.OpenCL.CLDevice,OpenTK.Compute.OpenCL.KernelWorkGroupInfo,System.UIntPtr,System.Byte[],System.UIntPtr@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetKernelWorkGroupInfo(OpenTK.Compute.OpenCL.CLKernel,OpenTK.Compute.OpenCL.CLDevice,OpenTK.Compute.OpenCL.KernelWorkGroupInfo,System.Byte[]@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetKernelSubGroupInfo(OpenTK.Compute.OpenCL.CLKernel,OpenTK.Compute.OpenCL.CLDevice,OpenTK.Compute.OpenCL.KernelSubGroupInfo,System.UIntPtr,System.IntPtr,System.UIntPtr,System.Byte[],System.UIntPtr@)">
+            <summary>
+            Introduced in OpenCL 2.1.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.WaitForEvents(System.UInt32,OpenTK.Compute.OpenCL.CLEvent[])">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetEventInfo(OpenTK.Compute.OpenCL.CLEvent,OpenTK.Compute.OpenCL.EventInfo,System.UIntPtr,System.Byte[],System.UIntPtr@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetEventInfo(OpenTK.Compute.OpenCL.CLEvent,OpenTK.Compute.OpenCL.EventInfo,System.Byte[]@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreateUserEvent(OpenTK.Compute.OpenCL.CLContext,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 1.1.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.RetainEvent(OpenTK.Compute.OpenCL.CLEvent)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.ReleaseEvent(OpenTK.Compute.OpenCL.CLEvent)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.SetUserEventStatus(OpenTK.Compute.OpenCL.CLEvent,System.Int32)">
+            <summary>
+            Introduced in OpenCL 1.1.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.SetEventCallback(OpenTK.Compute.OpenCL.CLEvent,System.Int32,System.IntPtr,System.IntPtr)">
+            <summary>
+            Introduced in OpenCL 1.1.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.SetEventCallback(OpenTK.Compute.OpenCL.CLEvent,System.Int32,OpenTK.Compute.OpenCL.CL.ClEventCallback)">
+            <summary>
+            Introduced in OpenCL 1.1.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetEventProfilingInfo(OpenTK.Compute.OpenCL.CLEvent,OpenTK.Compute.OpenCL.ProfilingInfo,System.UIntPtr,System.Byte[],System.UIntPtr@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetEventProfilingInfo(OpenTK.Compute.OpenCL.CLEvent,OpenTK.Compute.OpenCL.ProfilingInfo,System.Byte[]@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.Flush(OpenTK.Compute.OpenCL.CLCommandQueue)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.Finish(OpenTK.Compute.OpenCL.CLCommandQueue)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueReadBuffer(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLBuffer,System.Boolean,System.UIntPtr,System.UIntPtr,System.IntPtr,System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueReadBuffer``1(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLBuffer,System.Boolean,System.UIntPtr,``0[],OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueReadBuffer``1(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLBuffer,System.Boolean,System.UIntPtr,System.Span{``0},OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueReadBufferRect(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLBuffer,System.Boolean,System.UIntPtr[],System.UIntPtr[],System.UIntPtr[],System.UIntPtr,System.UIntPtr,System.UIntPtr,System.UIntPtr,System.IntPtr,System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.1.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueReadBufferRect``1(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLBuffer,System.Boolean,System.UIntPtr[],System.UIntPtr[],System.UIntPtr[],System.UIntPtr,System.UIntPtr,System.UIntPtr,System.UIntPtr,``0[],OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.1.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueReadBufferRect``1(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLBuffer,System.Boolean,System.UIntPtr[],System.UIntPtr[],System.UIntPtr[],System.UIntPtr,System.UIntPtr,System.UIntPtr,System.UIntPtr,System.Span{``0},OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.1.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueWriteBuffer(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLBuffer,System.Boolean,System.UIntPtr,System.UIntPtr,System.IntPtr,System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueWriteBuffer``1(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLBuffer,System.Boolean,System.UIntPtr,``0[],OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueWriteBuffer``1(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLBuffer,System.Boolean,System.UIntPtr,System.Span{``0},OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueWriteBufferRect(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLBuffer,System.Boolean,System.UIntPtr[],System.UIntPtr[],System.UIntPtr[],System.UIntPtr,System.UIntPtr,System.UIntPtr,System.UIntPtr,System.IntPtr,System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.1.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueWriteBufferRect``1(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLBuffer,System.Boolean,System.UIntPtr[],System.UIntPtr[],System.UIntPtr[],System.UIntPtr,System.UIntPtr,System.UIntPtr,System.UIntPtr,``0[],OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.1.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueWriteBufferRect``1(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLBuffer,System.Boolean,System.UIntPtr[],System.UIntPtr[],System.UIntPtr[],System.UIntPtr,System.UIntPtr,System.UIntPtr,System.UIntPtr,System.Span{``0},OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.1.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueFillBuffer(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLBuffer,System.IntPtr,System.UIntPtr,System.UIntPtr,System.UIntPtr,System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.2.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueFillBuffer``1(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLBuffer,``0[],System.UIntPtr,System.UIntPtr,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.2.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueCopyBuffer(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLBuffer,OpenTK.Compute.OpenCL.CLBuffer,System.UIntPtr,System.UIntPtr,System.UIntPtr,System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueCopyBufferRect(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLBuffer,OpenTK.Compute.OpenCL.CLBuffer,System.UIntPtr[],System.UIntPtr[],System.UIntPtr[],System.UIntPtr,System.UIntPtr,System.UIntPtr,System.UIntPtr,System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.1.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueReadImage(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLImage,System.Boolean,System.UIntPtr[],System.UIntPtr[],System.UIntPtr,System.UIntPtr,System.IntPtr,System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueWriteImage(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLImage,System.Boolean,System.UIntPtr[],System.UIntPtr[],System.UIntPtr,System.UIntPtr,System.IntPtr,System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueFillImage(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLImage,System.IntPtr,System.UIntPtr[],System.UIntPtr[],System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.2.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueCopyImage(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLImage,OpenTK.Compute.OpenCL.CLImage,System.UIntPtr[],System.UIntPtr[],System.UIntPtr[],System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueCopyImageToBuffer(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLImage,OpenTK.Compute.OpenCL.CLBuffer,System.UIntPtr[],System.UIntPtr[],System.UIntPtr,System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueCopyBufferToImage(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLBuffer,OpenTK.Compute.OpenCL.CLImage,System.UIntPtr,System.UIntPtr[],System.UIntPtr[],System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueMapBuffer(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLBuffer,System.Boolean,OpenTK.Compute.OpenCL.MapFlags,System.UIntPtr,System.UIntPtr,System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueMapImage(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLImage,System.Boolean,OpenTK.Compute.OpenCL.MapFlags,System.UIntPtr[],System.UIntPtr[],System.UIntPtr,System.UIntPtr,System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueUnmapMemoryObject(OpenTK.Compute.OpenCL.CLCommandQueue,System.IntPtr,System.IntPtr,System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueUnmapMemoryObject(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLBuffer,System.IntPtr,System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueUnmapMemoryObject(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLImage,System.IntPtr,System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueMigrateMemoryObjects(OpenTK.Compute.OpenCL.CLCommandQueue,System.UInt32,System.IntPtr[],OpenTK.Compute.OpenCL.MemoryMigrationFlags,System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.2.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueNDRangeKernel(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLKernel,System.UInt32,System.UIntPtr[],System.UIntPtr[],System.UIntPtr[],System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueNativeKernel(OpenTK.Compute.OpenCL.CLCommandQueue,System.IntPtr,System.IntPtr[],System.UIntPtr,System.UInt32,System.IntPtr[],System.IntPtr,System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueMarkerWithWaitList(OpenTK.Compute.OpenCL.CLCommandQueue,System.UInt32,System.IntPtr[],System.IntPtr,System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.2.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueBarrierWithWaitList(OpenTK.Compute.OpenCL.CLCommandQueue,System.UInt32,System.IntPtr[],System.IntPtr,System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.2.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueSVMFree(OpenTK.Compute.OpenCL.CLCommandQueue,System.UInt32,System.IntPtr[],System.IntPtr,System.IntPtr,System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 2.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueSvmMemoryCopy(OpenTK.Compute.OpenCL.CLCommandQueue,System.Boolean,System.IntPtr,System.IntPtr,System.UIntPtr,System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 2.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueSvmMemoryFill(OpenTK.Compute.OpenCL.CLCommandQueue,System.IntPtr,System.IntPtr,System.UIntPtr,System.UIntPtr,System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 2.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueSvmMap(OpenTK.Compute.OpenCL.CLCommandQueue,System.Boolean,OpenTK.Compute.OpenCL.MapFlags,System.IntPtr,System.UIntPtr,System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 2.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueSVMUnmap(OpenTK.Compute.OpenCL.CLCommandQueue,System.IntPtr,System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 2.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueSvmMigrateMemory(OpenTK.Compute.OpenCL.CLCommandQueue,System.UInt32,System.IntPtr[],System.UIntPtr[],OpenTK.Compute.OpenCL.MemoryMigrationFlags,System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 2.1.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetExtensionFunctionAddressForPlatform(OpenTK.Compute.OpenCL.CLPlatform,System.String)">
+            <summary>
+            Introduced in OpenCL 1.2.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreateImage2D(OpenTK.Compute.OpenCL.CLContext,OpenTK.Compute.OpenCL.MemoryFlags,OpenTK.Compute.OpenCL.ImageFormat@,System.UIntPtr,System.UIntPtr,System.UIntPtr,System.IntPtr,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreateImage3D(OpenTK.Compute.OpenCL.CLContext,OpenTK.Compute.OpenCL.MemoryFlags,OpenTK.Compute.OpenCL.ImageFormat@,System.UIntPtr,System.UIntPtr,System.UIntPtr,System.UIntPtr,System.UIntPtr,System.IntPtr,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueMarker(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLEvent)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueWaitForEvents(OpenTK.Compute.OpenCL.CLCommandQueue,System.UInt32,OpenTK.Compute.OpenCL.CLEvent[])">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueBarrier(OpenTK.Compute.OpenCL.CLCommandQueue)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.UnloadCompiler">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.GetExtensionFunctionAddress(System.String)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreateCommandQueue(OpenTK.Compute.OpenCL.CLContext,OpenTK.Compute.OpenCL.CLDevice,OpenTK.Compute.OpenCL.CommandQueueProperty,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.CreateSampler(OpenTK.Compute.OpenCL.CLContext,System.UInt32,OpenTK.Compute.OpenCL.AddressingMode,OpenTK.Compute.OpenCL.FilterMode,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CL.EnqueueTask(OpenTK.Compute.OpenCL.CLCommandQueue,OpenTK.Compute.OpenCL.CLKernel,System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="F:OpenTK.Compute.OpenCL.CLGL.ObjectType.ObjectTexture2DArray">
+            <summary>
+            Introduced in OpenCL 1.2
+            </summary>
+        </member>
+        <member name="F:OpenTK.Compute.OpenCL.CLGL.ObjectType.ObjectTexture1D">
+            <summary>
+            Introduced in OpenCL 1.2
+            </summary>
+        </member>
+        <member name="F:OpenTK.Compute.OpenCL.CLGL.ObjectType.ObjectTexture1DArray">
+            <summary>
+            Introduced in OpenCL 1.2
+            </summary>
+        </member>
+        <member name="F:OpenTK.Compute.OpenCL.CLGL.ObjectType.ObjectTextureBuffer">
+            <summary>
+            Introduced in OpenCL 1.2
+            </summary>
+        </member>
+        <member name="F:OpenTK.Compute.OpenCL.CLGL.TextureInfo.NumSamples">
+            <summary>
+            Introduced in OpenCL 1.2
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CLGL.CreateFromGLBuffer(OpenTK.Compute.OpenCL.CLContext,OpenTK.Compute.OpenCL.MemoryFlags,System.Int32,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CLGL.CreateFromGLTexture(OpenTK.Compute.OpenCL.CLContext,OpenTK.Compute.OpenCL.MemoryFlags,System.Int32,System.Int32,System.Int32,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in OpenCL 1.2.
+            </summary>
+            <param name="context"></param>
+            <param name="flags"></param>
+            <param name="target">This corresponds to the texture target used in OpenGL; e.g. (int)TextureTarget.Texture2D.</param>
+            <param name="mipLevel"></param>
+            <param name="texture"></param>
+            <param name="error"></param>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CLGL.CreateFromGLRenderbuffer(OpenTK.Compute.OpenCL.CLContext,OpenTK.Compute.OpenCL.MemoryFlags,System.Int32,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in Opencl 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CLGL.GetGLObjectInfo(OpenTK.Compute.OpenCL.CLBuffer,OpenTK.Compute.OpenCL.CLGL.ObjectType@,System.Int32@)">
+            <summary>
+            Introduced in Opencl 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CLGL.GetGLTextureInfo(OpenTK.Compute.OpenCL.CLBuffer,OpenTK.Compute.OpenCL.CLGL.TextureInfo,System.UIntPtr,System.Byte[],System.UIntPtr@)">
+            <summary>
+            Introduced in Opencl 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CLGL.EnqueueAcquireGLObjects(OpenTK.Compute.OpenCL.CLCommandQueue,System.UInt32,OpenTK.Compute.OpenCL.CLBuffer[],System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in Opencl 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CLGL.EnqueueReleaseGLObjects(OpenTK.Compute.OpenCL.CLCommandQueue,System.UInt32,OpenTK.Compute.OpenCL.CLBuffer[],System.UInt32,OpenTK.Compute.OpenCL.CLEvent[],OpenTK.Compute.OpenCL.CLEvent@)">
+            <summary>
+            Introduced in Opencl 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CLGL.CreateFromGLTexture2D(OpenTK.Compute.OpenCL.CLContext,OpenTK.Compute.OpenCL.MemoryFlags,System.Int32,System.Int32,System.Int32,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            [DEPRECATED] Introduced in Opencl 1.1.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CLGL.CreateFromGLTexture3D(OpenTK.Compute.OpenCL.CLContext,OpenTK.Compute.OpenCL.MemoryFlags,System.Int32,System.Int32,System.Int32,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            [DEPRECATED] Introduced in Opencl 1.1.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CLGL.GetGLContextInfoKHR(System.IntPtr[],OpenTK.Compute.OpenCL.CLGL.ContextInfo,System.UIntPtr,System.Byte[],System.UIntPtr@)">
+            <summary>
+            Introduced in Opencl 1.0.
+            </summary>
+        </member>
+        <member name="M:OpenTK.Compute.OpenCL.CLGL.CreateEventFromGLsyncKHR(OpenTK.Compute.OpenCL.CLContext,System.IntPtr,OpenTK.Compute.OpenCL.CLResultCode@)">
+            <summary>
+            Introduced in Opencl 1.1.
+            </summary>
+        </member>
+        <member name="P:OpenTK.Compute.OpenCL.OpenCLLibraryNameContainer.OverridePath">
+            <summary>
+            Overrides any platform detection logic and directly searches for the OpenCL library using the provided path.
+            If this is <c>null</c> then no override will happen.
+            </summary>
+        </member>
+    </members>
+</doc>
