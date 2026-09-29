@@ -18,8 +18,8 @@ namespace CsvPlotter
         private CsvPlotData? csvData;
 
 
-    private readonly List<int> _loadedColumnIndexes =
-        new List<int>();
+        private readonly List<int> _loadedColumnIndexes =
+            new List<int>();
 
         private readonly HashSet<int> _visibleColumnIndexes =
             new HashSet<int>();
@@ -184,7 +184,7 @@ namespace CsvPlotter
             }
         }
 
-     
+
 
         private async Task LoadCsvData()
         {
@@ -224,13 +224,13 @@ namespace CsvPlotter
                 minRows = 0;
             }
 
-            int resolution = 1000;
+            int resolution = 10000;
 
             if (!int.TryParse(
                 ResolutionTextBox.Text,
                 out resolution))
             {
-                resolution = 1000;
+                resolution = 10000;
             }
 
             if (resolution <= 0)
@@ -321,11 +321,11 @@ namespace CsvPlotter
 
 
 
-private async void ResetRangeButton_Click(
-    object sender,
-    RoutedEventArgs e)
+        private async void ResetRangeButton_Click(
+            object sender,
+            RoutedEventArgs e)
         {
-            
+
             MinRowsTextBox.Text = "0";
 
             if (_csvColumnNames.Count > 0 &&
@@ -356,7 +356,7 @@ private async void ResetRangeButton_Click(
                 MaxRowsTextBox.Text = "2000";
             }
 
-           
+
             await LoadCsvData();
 
             StatusText.Text =
@@ -645,6 +645,22 @@ private async void ResetRangeButton_Click(
                         Visibility.Visible;
                 }
 
+                int idx = 0;
+                for (int i = 0; i < _parameters.Count; i++)
+                {
+                    if (_parameters[i].ParameterRow.Visibility == Visibility.Visible)
+                    {
+                        _parameters[i].UiColor = new SolidColorBrush(ConvertColor(GetPlotColor(idx)));
+                        foreach (var element in _parameters[i].ParameterRow.Children)
+                        {
+                            if (element is Border border)
+                            {
+                                border.Background = new SolidColorBrush(ConvertColor(GetPlotColor(idx)));
+                            }
+                        }
+                        idx++;
+                    }
+                }
                 if (parameter.CheckBox != null)
                 {
                     parameter.CheckBox.IsChecked = true;
@@ -831,11 +847,18 @@ private async void ResetRangeButton_Click(
                 int parameterIndex =
                     _parameters.IndexOf(parameter);
 
-                scatter.Color =
-                    GetPlotColor(parameterIndex);
-
+                if (parameter.UiColor is SolidColorBrush)
+                {
+                    // Convert to ScottPlot Color (ARGB)
+                    var colour = ((SolidColorBrush)(parameter.UiColor));
+                    scatter.Color = new ScottPlot.Color(colour.Color.R, colour.Color.G, colour.Color.B, colour.Color.A);
+                }
+                else
+                {
+                    //scatter.Color = GetPlotColor(parameterIndex);
+                }
                 scatter.LineWidth = 1;
-
+                scatter.MarkerSize = 1;
                 parameter.Plot =
                     scatter;
             }
@@ -870,9 +893,13 @@ private async void ResetRangeButton_Click(
                     continue;
                 }
 
-                double[]? values =
-                    GetParameterValues(
-                        parameter.ColumnIndex);
+                double[]? values = null;
+                if (csvData.ParameterValuesDisplay.ContainsKey(
+                    parameter.ColumnIndex))
+                {
+                    values = csvData.ParameterValuesDisplay[
+                        parameter.ColumnIndex];
+                }
 
                 if (values == null ||
                     values.Length == 0)
@@ -925,7 +952,7 @@ private async void ResetRangeButton_Click(
 
                 grid.Children.Add(title);
 
-                WpfPlot plot =new WpfPlot();
+                WpfPlot plot = new WpfPlot();
 
                 Grid.SetRow(plot, 1);
 
@@ -936,7 +963,10 @@ private async void ResetRangeButton_Click(
 
                 StackedPlotPanel.Children.Add(
                     border);
-
+                plot.MouseWheel += (s, e) =>
+                {
+                    e.Handled = true;
+                };
                 _stackedPlots.Add(plot);
 
                 var scatter =
@@ -947,10 +977,17 @@ private async void ResetRangeButton_Click(
                 int parameterIndex =
                     _parameters.IndexOf(parameter);
 
-                scatter.Color =
-                    GetPlotColor(parameterIndex);
-
+                if (parameter.UiColor is System.Windows.Media.SolidColorBrush solidBrush)
+                {
+                    // Convert to ScottPlot Color (ARGB)
+                    scatter.Color = new ScottPlot.Color(solidBrush.Color.R, solidBrush.Color.G, solidBrush.Color.B, solidBrush.Color.A);
+                }
+                else
+                {
+                    //scatter.Color = GetPlotColor(parameterIndex);
+                }
                 scatter.LineWidth = 1;
+                scatter.MarkerSize = 1;
 
                 VerticalLine cursorLine =
                     plot.Plot.Add.VerticalLine(0);
@@ -982,24 +1019,25 @@ private async void ResetRangeButton_Click(
         }
 
 
-        private void StackedPlotScrollViewer_PreviewMouseWheel(
-            object sender,
-            MouseWheelEventArgs e)
+        private void StackedPlotScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             DependencyObject source = e.OriginalSource as DependencyObject;
 
-          
             while (source != null)
             {
                 if (source is WpfPlot)
                 {
-                    e.Handled = true;
+                    // Allow ScottPlot to process the mouse wheel for zooming/panning
+                    // BUT mark handled so the parent ScrollViewer does not scroll
+                    e.Handled = false; // let WpfPlot receive it
                     return;
                 }
 
                 source = VisualTreeHelper.GetParent(source);
             }
-         
+
+            // Block the mouse wheel from scrolling the outer ScrollViewer on all non-plot areas
+            //e.Handled = true;
         }
 
 
@@ -1096,7 +1134,7 @@ private async void ResetRangeButton_Click(
             }
         }
 
-        
+
         private void StackedPlot_MouseMove(
             object sender,
             MouseEventArgs e)

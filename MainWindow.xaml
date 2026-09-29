@@ -75,7 +75,7 @@
 
             <TextBox Grid.Column="7"
                  x:Name="ResolutionTextBox"
-                 Text="1000"
+                 Text="10000"
                  Height="30"
                  VerticalContentAlignment="Center"/>
 
@@ -290,7 +290,6 @@
                               Visibility="Collapsed"
                               VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled"
-                                  CanContentScroll="False"
                                   PreviewMouseWheel="StackedPlotScrollViewer_PreviewMouseWheel">
 
                         <StackPanel x:Name="StackedPlotPanel"
