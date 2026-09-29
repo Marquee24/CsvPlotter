@@ -3,7 +3,6 @@ using CsvPlotter.Helpers;
 using CsvPlotter.Models;
 using System.Globalization;
 using System.IO;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CsvPlotter.Services
 {
@@ -53,8 +52,8 @@ namespace CsvPlotter.Services
                 int valuesIdx = 0;
                 int avgRecordsCount = 0;
                 int avgFactor = 0;
-                double[,] values_1 = new double[selectedColumnIndexes.Length,avgFactor_1];
-                double[,] values_2 = new double[selectedColumnIndexes.Length,avgFactor_2];
+                double[,] values_1 = new double[selectedColumnIndexes.Length, avgFactor_1];
+                double[,] values_2 = new double[selectedColumnIndexes.Length, avgFactor_2];
 
                 while (csv.Read())
                 {
@@ -100,11 +99,11 @@ namespace CsvPlotter.Services
                             {
                                 if (avgRecordsCount < avgRatio)
                                 {
-                                    values_2[idx,valuesIdx] = value;
+                                    values_2[idx, valuesIdx] = value;
                                 }
                                 else
                                 {
-                                    values_1[idx,valuesIdx] = value;
+                                    values_1[idx, valuesIdx] = value;
                                 }
                             }
                             else
@@ -142,14 +141,83 @@ namespace CsvPlotter.Services
 
             foreach (var item in parameterLists)
             {
-                result.ParameterValues[item.Key] = item.Value.ToArray();
+
+                var data = item.Value.ToArray();
+
+                if (data.Length > 0)
+
+                {
+
+                    if (MainWindow.NormTime)
+
+                    {
+
+                        var notNullArray = data.Where(x => !double.IsNaN(x));
+
+                        if (notNullArray.Count() > 0)
+
+                        {
+
+                            double min = notNullArray.Min();
+
+                            double max = notNullArray.Max();
+
+                            if (min == max)
+
+                            {
+                                result.ParameterValues[item.Key] = data.Select(x =>
+
+                                -100.0).ToArray();
+                                result.ParameterValuesDisplay[item.Key] = data;
+                            }
+
+                            else
+
+                            {
+
+
+                                result.ParameterValues[item.Key] = data.Select(x =>
+
+                                ((x - min) * 1000.0 / (max - min))).ToArray();
+
+                                result.ParameterValuesDisplay[item.Key] = data;
+
+                            }
+                        }
+
+                        else
+                        {
+                            result.ParameterValues[item.Key] = data;
+
+                            result.ParameterValuesDisplay[item.Key] = data;
+                        }
+
+                    }
+
+
+
+                    else
+
+                    {
+                        result.ParameterValues[item.Key] = data;
+
+                        result.ParameterValuesDisplay[item.Key] = data;
+
+
+
+
+                    }
+
+                }
+
             }
 
             result.RowCount = timeList.Count;
 
-
             return result;
+
         }
+
 
 
         private static string GetFieldSafely(CsvReader csv, int columnIndex)

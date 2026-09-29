@@ -6,178 +6,326 @@
         Width="1400"
         Height="800"
         MinWidth="900"
-        MinHeight="500">
+        MinHeight="600">
 
-    <Grid Margin="8">
+    <Grid Margin="10">
 
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- TOP TOOLBAR -->
-        <Border Grid.Row="0"
-                Padding="8"
-                Margin="0,0,0,8"
-                BorderBrush="LightGray"
-                BorderThickness="1">
-
-            <Grid>
-
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition Width="Auto" MinWidth="89"/>
-                    <ColumnDefinition Width="114.497"/>
-                    <ColumnDefinition Width="Auto" MinWidth="442.88"/>
-                </Grid.ColumnDefinitions>
-
-                <Button x:Name="BrowseButton"
-            Grid.Column="0"
-            Margin="0,0,8,0"
-            Content="Browse CSV"
-            Click="BrowseButton_Click" Height="30" VerticalAlignment="Center"/>
-
-                <TextBox x:Name="FilePathTextBox"
-             Grid.Column="1"
-             VerticalContentAlignment="Center"
-             IsReadOnly="True" Margin="0,0,10,0" Grid.ColumnSpan="3"/>
-                <TextBlock Grid.Column="4"
-               Margin="142,0,234,0"
-               VerticalAlignment="Center"
-               Text="Min Rows:" Height="16"/>
-
-                <TextBox x:Name="MinRowsTextBox"
-             Grid.Column="4"
-             VerticalContentAlignment="Center"
-             Text="0" Margin="214,0,185,0"/>
-
-                <TextBlock Grid.Column="4"
-               Margin="273,0,100,0"
-               VerticalAlignment="Center"
-               Text="Max Rows:" Height="16"/>
-
-                <TextBox x:Name="MaxRowsTextBox"
-             Grid.Column="4"
-             VerticalContentAlignment="Center"
-             Text="2000" Margin="338,0,56,0"/>
-
-                <Button x:Name="LoadButton"
-            Grid.Column="4"
-            Margin="392,0,0,0"
-            Content="Load"
-            Click="LoadButton_Click"/>
-                <TextBlock Grid.Column="4"
-                    Margin="10,0,369,0"
-                    VerticalAlignment="Center"
-                    Text="Resolution:" Height="16"/>
-                <TextBox x:Name="ResolutionTextBox"
-                    Grid.Column="4"
-                    VerticalContentAlignment="Center"
-                    Text="10000" Margin="79,0,306,0"/>
-
-            </Grid>
-        </Border>
-
-
-        <!-- MAIN AREA -->
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="0" Margin="0,0,0,8">
 
             <Grid.ColumnDefinitions>
-
-                <!-- Plot -->
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
-
-                <!-- Splitter -->
-                <ColumnDefinition Width="5"/>
-
-                <!-- Parameters -->
-                <ColumnDefinition Width="340"/>
-
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="80"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="80"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="80"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
 
-            <!-- PLOT -->
+            <Button Grid.Column="0"
+                    x:Name="BrowseButton"
+                    Content="Browse"
+                    Width="80"
+                    Height="30"
+                    Margin="0,0,6,0"
+                    Click="BrowseButton_Click"/>
+
+
+            <TextBox Grid.Column="1"
+                     x:Name="FilePathTextBox"
+                     Height="30"
+                     VerticalContentAlignment="Center"/>
+
+
+            <TextBlock Grid.Column="2"
+                       Text="Min:"
+                       VerticalAlignment="Center"
+                       Margin="10,0,4,0"/>
+
+
+            <TextBox Grid.Column="3"
+                     x:Name="MinRowsTextBox"
+                     Text="0"
+                     Height="30"
+                     VerticalContentAlignment="Center"/>
+
+
+            <TextBlock Grid.Column="4"
+                       Text="Max:"
+                       VerticalAlignment="Center"
+                       Margin="10,0,4,0"/>
+
+
+            <TextBox Grid.Column="5"
+                     x:Name="MaxRowsTextBox"
+                     Text="2000"
+                     Height="30"
+                     VerticalContentAlignment="Center"/>
+
+
+            <TextBlock Grid.Column="6"
+                       Text="Resolution:"
+                       VerticalAlignment="Center"
+                       Margin="10,0,4,0"/>
+
+
+            <TextBox Grid.Column="7"
+                     x:Name="ResolutionTextBox"
+                     Text="1000"
+                     Height="30"
+                     VerticalContentAlignment="Center"/>
+
+
+            <Button Grid.Column="8"
+                    x:Name="LoadButton"
+                    Content="Load"
+                    Width="80"
+                    Height="30"
+                    Margin="10,0,0,0"
+                    Click="LoadButton_Click"/>
+
+        </Grid>
+
+
+
+        <Grid Grid.Row="1" Margin="0,0,0,8">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="170"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+
+            <RadioButton Grid.Column="0"
+                         Content="Standard Values"
+                         GroupName="TimeMode"
+                         Margin="0,0,15,0"
+                         Checked="StandardTime_Checked"/>
+
+
+            <RadioButton Grid.Column="1"
+                         Content="Normalised Values"
+                         GroupName="TimeMode"
+                         IsChecked="True"
+                         Checked="NormalisedTime_Checked"/>
+
+
+            <TextBlock Grid.Column="2"
+                       Text="Chart:"
+                       VerticalAlignment="Center"
+                       Margin="20,0,6,0"/>
+
+
+            <ComboBox Grid.Column="3"
+                      x:Name="ChartTypeComboBox"
+                      Width="160"
+                      Height="28"
+                      VerticalContentAlignment="Center"
+                      SelectionChanged="ChartTypeComboBox_SelectionChanged">
+
+                <ComboBoxItem Content="Superimposed"
+                              IsSelected="True"/>
+
+                <ComboBoxItem Content="Stacked"/>
+
+            </ComboBox>
+
+
+            <Button Grid.Column="5"
+                    x:Name="FilterButton"
+                    Content="Filter"
+                    Width="80"
+                    Margin="10,0,0,0"
+                    Click="Filter_Click"/>
+
+
+            <Popup x:Name="FilterPopUp"
+                   PlacementTarget="{Binding ElementName=FilterButton}"
+                   Placement="Bottom"
+                   StaysOpen="False"
+                   AllowsTransparency="True">
+
+                <Border Background="White"
+                        BorderBrush="Gray"
+                        BorderThickness="1"
+                        Padding="8">
+
+                    <StackPanel>
+
+                        <!-- SEARCH BOX -->
+
+                        <TextBlock Text="Search parameter:"
+                                   FontWeight="Bold"
+                                   Margin="2,0,2,4"/>
+
+                        <TextBox x:Name="FilterSearchTextBox"
+                                 Height="28"
+                                 Margin="0,0,0,8"
+                                 VerticalContentAlignment="Center"
+                                 TextChanged="FilterSearchTextBox_TextChanged"/>
+
+
+                        <!-- PARAMETER LIST -->
+
+                        <ScrollViewer Width="250"
+                                      MaxHeight="400">
+
+                            <StackPanel x:Name="FilterStack"/>
+
+                        </ScrollViewer>
+
+                    </StackPanel>
+
+                </Border>
+
+            </Popup>
+
+        </Grid>
+
+
+
+        <Grid Grid.Row="2">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+
             <Border Grid.Column="0"
                     BorderBrush="Gray"
-                    BorderThickness="1">
+                    BorderThickness="1"
+                    Padding="5">
 
-                <scottPlot:WpfPlot x:Name="PlotControl"/>
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+
+                    <StackPanel>
+
+
+
+                        <Border BorderBrush="LightGray"
+                                BorderThickness="1"
+                                Padding="5"
+                                Margin="0,0,0,8">
+
+                            <StackPanel>
+
+                                <TextBlock Text="Cursor Information"
+                                           FontWeight="Bold"
+                                           Margin="0,0,0,5"/>
+
+
+                                <Grid Margin="0,2">
+
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="90"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0"
+                                               Text="Time:"
+                                               VerticalAlignment="Center"/>
+
+                                    <TextBox Grid.Column="1"
+                                             x:Name="CursorTimeTextBox"
+                                             Text="--"
+                                             Height="26"
+                                             IsReadOnly="True"
+                                             VerticalContentAlignment="Center"/>
+
+                                </Grid>
+
+
+                                <Grid Margin="0,2">
+
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="90"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!--<TextBlock Grid.Column="0"
+                                               Text="Record:"
+                                               VerticalAlignment="Center"/>-->
+
+                                    <TextBox Grid.Column="1"
+                                             x:Name="CursorRecordTextBox"
+                                             Visibility="Collapsed"
+                                             Text="--"
+                                             Height="26"
+                                             IsReadOnly="True"
+                                             VerticalContentAlignment="Center"/>
+
+                                </Grid>
+
+                            </StackPanel>
+
+                        </Border>
+
+
+
+
+                        <TextBlock Text="Parameters"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,5"/>
+
+
+                        <StackPanel x:Name="ParameterPanel"/>
+
+                    </StackPanel>
+
+                </ScrollViewer>
 
             </Border>
 
 
             <!-- SPLITTER -->
+
             <GridSplitter Grid.Column="1"
-                          Width="5"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
                           ResizeDirection="Columns"
                           ResizeBehavior="PreviousAndNext"/>
 
 
-            <!-- RIGHT PANEL -->
+
             <Border Grid.Column="2"
-                    Margin="5,0,0,0"
                     BorderBrush="Gray"
-                    BorderThickness="1">
+                    BorderThickness="1"
+                    Margin="5,0,0,0">
 
                 <Grid>
 
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" MinHeight="111"/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
+                    <!-- SUPERIMPOSED PLOT -->
+
+                    <scottPlot:WpfPlot x:Name="PlotControl"
+                                       Visibility="Visible"/>
 
 
-                    <!-- TIME -->
-                    <Border Grid.Row="0"
-                            Padding="8"
-                            BorderBrush="LightGray"
-                            BorderThickness="0,0,0,1">
+                    <!-- STACKED PLOTS -->
 
-                        <Grid Margin="0,0,0,1">
-
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <TextBlock Grid.Column="0"
-                                       Margin="0,16,8,0"
-                                       VerticalAlignment="Top"
-                                       FontWeight="Bold"
-                                       Text="Time:"/>
-
-                            <TextBox x:Name="CursorTimeTextBox"
-                                     Height="28"
-                                     VerticalContentAlignment="Center"
-                                     IsReadOnly="True"
-                                     Text="--" Margin="0,10,0,55" Grid.Column="1"/>
-                            <TextBlock Grid.Column="0"
-                                Margin="0,61,8,0"
-                                VerticalAlignment="Top"
-                                FontWeight="Bold"
-                                Text="Record :"/>
-                            <TextBox x:Name="CursorRecordTextBox"
-                                Height="28"
-                                VerticalContentAlignment="Center"
-                                IsReadOnly="True"
-                                Text="--" Margin="0,55,0,10" Grid.Column="1"/>
-
-                        </Grid>
-
-                    </Border>
-
-
-                    <!-- PARAMETER LIST -->
-                    <ScrollViewer Grid.Row="1"
+                    <ScrollViewer x:Name="StackedPlotScrollViewer"
+                                  Visibility="Collapsed"
                                   VerticalScrollBarVisibility="Auto"
-                                  HorizontalScrollBarVisibility="Disabled" Margin="-3,0,0,0">
+                                  HorizontalScrollBarVisibility="Disabled">
 
-                        <StackPanel x:Name="ParameterPanel"
-                                    Margin="8"/>
+                        <StackPanel x:Name="StackedPlotPanel"
+                                    Margin="5"/>
 
                     </ScrollViewer>
 
@@ -188,19 +336,17 @@
         </Grid>
 
 
-        <!-- STATUS -->
-        <Border Grid.Row="2"
-                Margin="0,8,0,0"
-                Padding="5"
-                BorderBrush="LightGray"
-                BorderThickness="1">
+
+        <Grid Grid.Row="3"
+              Margin="0,8,0,0">
 
             <TextBlock x:Name="StatusText"
                        Text="Ready"
                        VerticalAlignment="Center"/>
 
-        </Border>
+        </Grid>
 
     </Grid>
 
 </Window>
+

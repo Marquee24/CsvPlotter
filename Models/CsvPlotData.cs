@@ -11,6 +11,8 @@ namespace CsvPlotter.Models
 
         public Dictionary<int, double[]> ParameterValues { get; set; }
             = new Dictionary<int, double[]>();
+        public Dictionary<int, double[]> ParameterValuesDisplay { get; set; }
+            = new Dictionary<int, double[]>();
 
         public Dictionary<int, string> ColumnNames { get; set; }
             = new Dictionary<int, string>();

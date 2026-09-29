@@ -1,8 +1,11 @@
-﻿using CsvPlotter.Models;
+﻿
+using CsvPlotter.Models;
 using CsvPlotter.Services;
 using Microsoft.Win32;
 using ScottPlot;
 using ScottPlot.Plottables;
+using ScottPlot.TickGenerators.TimeUnits;
+using ScottPlot.WPF;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
@@ -16,50 +19,67 @@ namespace CsvPlotter
     {
         private CsvPlotData? csvData;
 
-        private readonly List<ParameterInfo> _parameters = new List<ParameterInfo>();
+        private readonly List<int> _loadedColumnIndexes =
+            new List<int>();
 
-        private readonly List<int> _selectedColumnIndexes = new List<int> { 1, 44, 45, 69 };
+        private readonly HashSet<int> _visibleColumnIndexes =
+            new HashSet<int>();
+
+        private readonly List<ParameterInfo> _parameters =
+            new List<ParameterInfo>();
+
+        private readonly Dictionary<int, string> _csvColumnNames =
+            new Dictionary<int, string>();
+
+        private enum ChartType
+        {
+            Superimposed,
+            Stacked
+        }
+
+        private ChartType _currentChartType =
+            ChartType.Superimposed;
+
+        private readonly List<WpfPlot> _stackedPlots =
+            new List<WpfPlot>();
 
         private VerticalLine? verticalCursorLine;
 
+        private readonly List<VerticalLine> _stackedCursorLines =
+            new List<VerticalLine>();
 
-        private readonly Stopwatch _mouseTimer = Stopwatch.StartNew();
+        public static bool NormTime = true;
 
-        private const int MouseUpdateMilliseconds = 30;
+        private DateTime _lastMouseMoveTime =
+            DateTime.MinValue;
+
+        private const int MouseMoveIntervalMs = 30;
+
+        private readonly ScottPlot.Color[] _plotColors =
+        {
+            ScottPlot.Colors.Blue,
+            ScottPlot.Colors.Red,
+            ScottPlot.Colors.Green,
+            ScottPlot.Colors.Orange,
+            ScottPlot.Colors.Purple,
+            ScottPlot.Colors.Brown,
+            ScottPlot.Colors.Magenta,
+            ScottPlot.Colors.Cyan,
+            ScottPlot.Colors.DarkBlue,
+            ScottPlot.Colors.DarkRed
+        };
+
         public MainWindow()
         {
             InitializeComponent();
 
-            SetupPlot();
-
             PlotControl.MouseMove += PlotControl_MouseMove;
-
             PlotControl.MouseLeave += PlotControl_MouseLeave;
         }
 
-
-        private void SetupPlot()
-        {
-            PlotControl.Plot.Title("Parameter Plot");
-
-            PlotControl.Plot.XLabel("Time");
-
-            PlotControl.Plot.YLabel("Data");
-
-
-            verticalCursorLine = PlotControl.Plot.Add.VerticalLine(1);
-
-            verticalCursorLine.IsVisible = true;
-            verticalCursorLine.Color = ScottPlot.Colors.DarkRed;
-
-            verticalCursorLine.LineWidth = 1;
-
-
-            PlotControl.Refresh();
-        }
-
-
-        private void BrowseButton_Click(object sender, RoutedEventArgs e)
+        private void BrowseButton_Click(
+            object sender,
+            RoutedEventArgs e)
         {
             OpenFileDialog dialog =
                 new OpenFileDialog
@@ -68,99 +88,204 @@ namespace CsvPlotter
                         "CSV Files (*.csv)|*.csv|All Files (*.*)|*.*"
                 };
 
+            if (dialog.ShowDialog() != true)
+                return;
 
-            if (dialog.ShowDialog() == true)
+            FilePathTextBox.Text = dialog.FileName;
+
+            try
             {
-                FilePathTextBox.Text =
-                    dialog.FileName;
+                var allLines = File.ReadLines(dialog.FileName);
+
+                int lineCount = allLines.Count();
+
+                MaxRowsTextBox.Text = lineCount.ToString();
+                MinRowsTextBox.Text = "0";
+
+                string firstLine =
+                    allLines.FirstOrDefault();
+
+                if (string.IsNullOrWhiteSpace(firstLine))
+                {
+                    MessageBox.Show(
+                        "CSV file is empty.",
+                        "CSV",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+
+                    return;
+                }
+
+                string[] headers =
+                    firstLine.Split(',');
+
+                int columnCount =
+                    headers.Length;
+
+                if (columnCount <= 1)
+                {
+                    MessageBox.Show(
+                        "No parameter columns found.",
+                        "CSV",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+
+                    return;
+                }
+
+                _csvColumnNames.Clear();
+
+                for (int i = 0; i < headers.Length; i++)
+                {
+                    _csvColumnNames[i] =
+                        headers[i].Trim().Trim('"');
+                }
+
+                _loadedColumnIndexes.Clear();
+
+                for (int i = 0; i < columnCount; i++)
+                {
+                    _loadedColumnIndexes.Add(i);
+                }
+
+                _visibleColumnIndexes.Clear();
+                _parameters.Clear();
+
+                CreateParameterPanel();
+
+                StatusText.Text =
+                    $"CSV selected: {lineCount:N0} rows, " +
+                    $"{columnCount - 1} parameters";
             }
-            var allLines = File.ReadLines(FilePathTextBox.Text);
-            int lineCount = allLines.Count();
-            MaxRowsTextBox.Text = lineCount.ToString();
-            MinRowsTextBox.Text = 0.ToString();
-            int coloumnsCount = allLines.ToArray()[0].Split(',').Length;
-            _selectedColumnIndexes.Clear();
-            for (int i = 1; i < coloumnsCount; i++)
+            catch (Exception ex)
             {
-                _selectedColumnIndexes.Add(i);
+                MessageBox.Show(
+                    ex.Message,
+                    "Browse Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
         }
 
-
-        private async void LoadButton_Click(object sender, RoutedEventArgs e)
+        private async void LoadButton_Click(
+            object sender,
+            RoutedEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(FilePathTextBox.Text))
+            if (string.IsNullOrWhiteSpace(
+                FilePathTextBox.Text))
             {
-                MessageBox.Show("Please select a CSV file.");
+                MessageBox.Show(
+                    "Please select a CSV file.");
 
                 return;
             }
 
-
-            if (_selectedColumnIndexes.Count == 0)
+            if (_loadedColumnIndexes.Count == 0)
             {
-                MessageBox.Show("Please select at least one column.");
+                MessageBox.Show(
+                    "Please select a CSV file first.");
 
                 return;
             }
-
 
             int maxRows = 2000;
-            if (!int.TryParse(MaxRowsTextBox.Text, out maxRows))
+
+            if (!int.TryParse(
+                MaxRowsTextBox.Text,
+                out maxRows))
             {
                 maxRows = 2000;
             }
 
             int minRows = 0;
-            if (!int.TryParse(MinRowsTextBox.Text, out minRows))
+
+            if (!int.TryParse(
+                MinRowsTextBox.Text,
+                out minRows))
             {
                 minRows = 0;
             }
 
             int Resolution = 1000;
-            if (!int.TryParse(ResolutionTextBox.Text, out Resolution))
+
+            if (!int.TryParse(
+                ResolutionTextBox.Text,
+                out Resolution))
             {
                 Resolution = 1000;
             }
 
+            if (Resolution <= 0)
+                Resolution = 1000;
 
-            StatusText.Text = "Loading CSV...";
-
+            StatusText.Text =
+                "Loading CSV...";
 
             LoadButton.IsEnabled = false;
             BrowseButton.IsEnabled = false;
 
-
             try
             {
-                string filePath = FilePathTextBox.Text;
+                string filePath =
+                    FilePathTextBox.Text;
 
+                int[] selectedColumns =
+                    _loadedColumnIndexes.ToArray();
 
-                int[] selectedColumns = _selectedColumnIndexes.ToArray();
+                Stopwatch stopwatch =
+                    Stopwatch.StartNew();
 
-
-                Stopwatch stopwatch = Stopwatch.StartNew();
-
-
-                CsvPlotData data = await Task.Run(() => CsvDataReader.Read(filePath, selectedColumns, maxRows, minRows, Resolution));
-
+                CsvPlotData data =
+                    await Task.Run(() =>
+                        CsvDataReader.Read(
+                            filePath,
+                            selectedColumns,
+                            maxRows,
+                            minRows,
+                            Resolution));
 
                 stopwatch.Stop();
+
                 csvData = data;
 
-                CreatePlots();
+                _visibleColumnIndexes.Clear();
 
-                CreateParameterPanel();
+                foreach (ParameterInfo parameter
+                         in _parameters)
+                {
+                    if (parameter.CheckBox != null)
+                        parameter.CheckBox.IsChecked = false;
 
+                    if (parameter.FilterCheckBox != null)
+                        parameter.FilterCheckBox.IsChecked = false;
 
-                StatusText.Text = $"Loaded {csvData.RowCount:N0} rows in " + $"{stopwatch.ElapsedMilliseconds:N0} ms";
+                    if (parameter.ParameterRow != null)
+                        parameter.ParameterRow.Visibility =
+                            Visibility.Collapsed;
+
+                    parameter.Plot = null;
+                }
+
+                ClearAllPlots();
+
+                CursorTimeTextBox.Text = "--";
+                CursorRecordTextBox.Text = "--";
+
+                StatusText.Text =
+                    $"Loaded {csvData.RowCount:N0} plot points " +
+                    $"in {stopwatch.ElapsedMilliseconds:N0} ms";
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error loading CSV:\n\n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(
+                    "Error loading CSV:\n\n" +
+                    ex.Message,
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
 
-
-                StatusText.Text = "Loading failed.";
+                StatusText.Text =
+                    "Loading failed.";
             }
             finally
             {
@@ -169,422 +294,1028 @@ namespace CsvPlotter
             }
         }
 
-        private void CreatePlots()
+        private void CreateParameterPanel()
         {
-            PlotControl.Plot.Clear();
-
+            ParameterPanel.Children.Clear();
+            FilterStack.Children.Clear();
             _parameters.Clear();
 
-
-            if (csvData == null || csvData.RowCount == 0)
-            {
-                PlotControl.Refresh();
-                return;
-            }
-
-
-            ScottPlot.Color[] colors =
-            {
-                ScottPlot.Colors.Blue,
-                ScottPlot.Colors.Red,
-                ScottPlot.Colors.Green,
-                ScottPlot.Colors.Orange,
-                ScottPlot.Colors.Purple,
-                ScottPlot.Colors.Cyan,
-                ScottPlot.Colors.Magenta,
-                ScottPlot.Colors.Brown,
-                ScottPlot.Colors.DarkBlue,
-                ScottPlot.Colors.DarkGreen
-            };
-
-
-            int colorIndex = 0;
-
-
-            foreach (int columnIndex in _selectedColumnIndexes)
+            foreach (int columnIndex
+                     in _loadedColumnIndexes)
             {
                 if (columnIndex == 0)
                     continue;
 
+                string parameterName =
+                    GetColumnName(columnIndex);
 
-                if (!csvData.ParameterValues.ContainsKey(columnIndex))
+                Grid row = new Grid();
+
+                row.Margin =
+                    new Thickness(0, 2, 0, 2);
+
+                row.ColumnDefinitions.Add(
+                    new ColumnDefinition
+                    {
+                        Width = GridLength.Auto
+                    });
+
+                row.ColumnDefinitions.Add(
+                    new ColumnDefinition
+                    {
+                        Width = new GridLength(22)
+                    });
+
+                row.ColumnDefinitions.Add(
+                    new ColumnDefinition
+                    {
+                        Width =
+                            new GridLength(
+                                1,
+                                GridUnitType.Star)
+                    });
+
+                row.ColumnDefinitions.Add(
+                    new ColumnDefinition
+                    {
+                        Width = new GridLength(100)
+                    });
+
+                CheckBox parameterCheckBox =
+                    new CheckBox();
+
+                parameterCheckBox.VerticalAlignment =
+                    System.Windows.VerticalAlignment.Center;
+
+                parameterCheckBox.IsChecked =
+                    false;
+
+                Grid.SetColumn(
+                    parameterCheckBox,
+                    0);
+
+                Border colorBorder =
+                    new Border();
+
+                colorBorder.Width = 14;
+                colorBorder.Height = 14;
+
+                colorBorder.Margin =
+                    new Thickness(3, 0, 5, 0);
+
+                colorBorder.CornerRadius =
+                    new CornerRadius(2);
+
+                colorBorder.Background =
+                    new SolidColorBrush(
+                        ConvertColor(
+                            GetPlotColor(
+                                _parameters.Count)));
+
+                Grid.SetColumn(
+                    colorBorder,
+                    1);
+
+                TextBlock nameText =
+                    new TextBlock();
+
+                nameText.Text =
+                    parameterName;
+
+                nameText.VerticalAlignment =
+                    System.Windows.VerticalAlignment.Center;
+
+                nameText.TextTrimming =
+                    TextTrimming.CharacterEllipsis;
+
+                nameText.ToolTip =
+                    parameterName;
+
+                Grid.SetColumn(
+                    nameText,
+                    2);
+
+                TextBox valueTextBox =
+                    new TextBox();
+
+                valueTextBox.Text = "--";
+                valueTextBox.Height = 26;
+                valueTextBox.IsReadOnly = true;
+
+                valueTextBox.VerticalContentAlignment =
+                    System.Windows.VerticalAlignment.Center;
+
+                valueTextBox.Margin =
+                    new Thickness(5, 0, 0, 0);
+
+                Grid.SetColumn(
+                    valueTextBox,
+                    3);
+
+                row.Children.Add(
+                    parameterCheckBox);
+
+                row.Children.Add(
+                    colorBorder);
+
+                row.Children.Add(
+                    nameText);
+
+                row.Children.Add(
+                    valueTextBox);
+
+                row.Visibility =
+                    Visibility.Collapsed;
+
+                ParameterInfo parameter =
+                    new ParameterInfo
+                    {
+                        ColumnIndex =
+                            columnIndex,
+
+                        Name =
+                            parameterName,
+
+                        CheckBox =
+                            parameterCheckBox,
+
+                        ValueTextBox =
+                            valueTextBox,
+
+                        UiColor =
+                            new SolidColorBrush(
+                                ConvertColor(
+                                    GetPlotColor(
+                                        _parameters.Count))),
+
+                        ParameterRow =
+                            row,
+
+                        Plot = null
+                    };
+
+                parameterCheckBox.Checked +=
+                    ParameterCheckBox_Changed;
+
+                parameterCheckBox.Unchecked +=
+                    ParameterCheckBox_Changed;
+
+                _parameters.Add(parameter);
+
+                ParameterPanel.Children.Add(row);
+
+                CheckBox filterCheckBox =
+                    new CheckBox();
+
+                filterCheckBox.Content =
+                    parameterName;
+
+                filterCheckBox.Margin =
+                    new Thickness(2, 3, 2, 3);
+
+                filterCheckBox.IsChecked =
+                    false;
+
+                parameter.FilterCheckBox =
+                    filterCheckBox;
+
+                filterCheckBox.Checked +=
+                    FilterParameterCheckBox_Changed;
+
+                filterCheckBox.Unchecked +=
+                    FilterParameterCheckBox_Changed;
+
+                FilterStack.Children.Add(
+                    filterCheckBox);
+            }
+        }
+
+        private string GetColumnName(
+            int columnIndex)
+        {
+            if (_csvColumnNames.ContainsKey(
+                columnIndex))
+            {
+                return _csvColumnNames[
+                    columnIndex];
+            }
+
+            if (csvData != null &&
+                csvData.ColumnNames.ContainsKey(
+                    columnIndex))
+            {
+                return csvData.ColumnNames[
+                    columnIndex];
+            }
+
+            return $"Parameter {columnIndex}";
+        }
+
+        private void Filter_Click(
+            object sender,
+            RoutedEventArgs e)
+        {
+            FilterPopUp.IsOpen =
+                !FilterPopUp.IsOpen;
+
+            if (FilterPopUp.IsOpen)
+            {
+                FilterSearchTextBox.Focus();
+            }
+        }
+
+        private void FilterSearchTextBox_TextChanged(
+            object sender,
+            TextChangedEventArgs e)
+        {
+            UpdateFilterList();
+        }
+
+        private void UpdateFilterList()
+        {
+            if (FilterStack == null)
+                return;
+
+            string searchText =
+                FilterSearchTextBox.Text
+                .Trim()
+                .ToLower();
+
+            FilterStack.Children.Clear();
+
+            foreach (ParameterInfo parameter
+                     in _parameters)
+            {
+                if (parameter.FilterCheckBox == null)
+                    continue;
+
+                bool matches =
+                    string.IsNullOrEmpty(searchText) ||
+                    parameter.Name
+                    .ToLower()
+                    .Contains(searchText);
+
+                if (matches)
+                {
+                    FilterStack.Children.Add(
+                        parameter.FilterCheckBox);
+                }
+            }
+        }
+
+        private void FilterParameterCheckBox_Changed(
+            object sender,
+            RoutedEventArgs e)
+        {
+            if (sender is not CheckBox filterCheckBox)
+                return;
+
+            ParameterInfo? parameter =
+                _parameters.FirstOrDefault(
+                    p =>
+                        p.FilterCheckBox ==
+                        filterCheckBox);
+
+            if (parameter == null)
+                return;
+
+            if (filterCheckBox.IsChecked == true)
+            {
+                if (parameter.ParameterRow != null)
+                {
+                    parameter.ParameterRow.Visibility =
+                        Visibility.Visible;
+                }
+
+                if (parameter.CheckBox != null)
+                {
+                    parameter.CheckBox.IsChecked =
+                        true;
+                }
+            }
+            else
+            {
+                if (parameter.ParameterRow != null)
+                {
+                    parameter.ParameterRow.Visibility =
+                        Visibility.Collapsed;
+                }
+
+                if (parameter.CheckBox != null)
+                {
+                    parameter.CheckBox.IsChecked =
+                        false;
+                }
+            }
+        }
+
+        private void ParameterCheckBox_Changed(
+            object sender,
+            RoutedEventArgs e)
+        {
+            if (sender is not CheckBox checkBox)
+                return;
+
+            ParameterInfo? parameter =
+                _parameters.FirstOrDefault(
+                    p =>
+                        p.CheckBox ==
+                        checkBox);
+
+            if (parameter == null)
+                return;
+
+            if (checkBox.IsChecked == true)
+            {
+                _visibleColumnIndexes.Add(
+                    parameter.ColumnIndex);
+            }
+            else
+            {
+                _visibleColumnIndexes.Remove(
+                    parameter.ColumnIndex);
+            }
+
+            CreatePlots();
+        }
+
+        private void ChartTypeComboBox_SelectionChanged(
+            object sender,
+            SelectionChangedEventArgs e)
+        {
+            if (ChartTypeComboBox == null)
+                return;
+
+            if (ChartTypeComboBox.SelectedIndex == 0)
+            {
+                _currentChartType =
+                    ChartType.Superimposed;
+            }
+            else
+            {
+                _currentChartType =
+                    ChartType.Stacked;
+            }
+
+            CreatePlots();
+        }
+
+        private void CreatePlots()
+        {
+            if (csvData == null)
+            {
+                ClearAllPlots();
+                return;
+            }
+
+            ClearAllPlots();
+
+            if (_currentChartType ==
+                ChartType.Superimposed)
+            {
+                PlotControl.Visibility =
+                    Visibility.Visible;
+
+                StackedPlotScrollViewer.Visibility =
+                    Visibility.Collapsed;
+
+                CreateSuperimposedPlot();
+            }
+            else
+            {
+                PlotControl.Visibility =
+                    Visibility.Collapsed;
+
+                StackedPlotScrollViewer.Visibility =
+                    Visibility.Visible;
+
+                CreateStackedPlots();
+            }
+        }
+
+        private void ClearAllPlots()
+        {
+            if (PlotControl != null)
+            {
+                PlotControl.Plot.Clear();
+
+                verticalCursorLine = null;
+
+                PlotControl.Refresh();
+            }
+
+            if (StackedPlotPanel != null)
+            {
+                StackedPlotPanel.Children.Clear();
+            }
+
+            _stackedPlots.Clear();
+
+            _stackedCursorLines.Clear();
+
+            foreach (ParameterInfo parameter
+                     in _parameters)
+            {
+                parameter.Plot = null;
+            }
+        }
+
+        private void CreateSuperimposedPlot()
+        {
+            if (csvData == null)
+                return;
+
+            PlotControl.Plot.Clear();
+
+            verticalCursorLine =
+                PlotControl.Plot.Add.VerticalLine(0);
+
+            verticalCursorLine.LineWidth = 1;
+
+            verticalCursorLine.Color =
+                ScottPlot.Colors.DarkRed;
+
+            foreach (ParameterInfo parameter in _parameters)
+            {
+                parameter.Plot = null;
+
+                if (!_visibleColumnIndexes.Contains(
+                    parameter.ColumnIndex))
                 {
                     continue;
                 }
 
+                double[]? values =
+                    GetParameterValues(
+                        parameter.ColumnIndex);
 
-                string parameterName = csvData.ColumnNames.ContainsKey(columnIndex) ? csvData.ColumnNames[columnIndex] : $"Column {columnIndex}";
+                if (values == null ||
+                    values.Length == 0)
+                {
+                    continue;
+                }
 
+                var scatter =
+                    PlotControl.Plot.Add.Scatter(
+                        csvData.TimeMilliseconds,
+                        values);
 
-                ScottPlot.Color plotColor = colors[colorIndex % colors.Length];
+                // Keep the parameter's original color
+                // regardless of selection order.
+                int parameterIndex =
+                    _parameters.IndexOf(parameter);
 
-
-                Brush uiColor = ConvertScottPlotColorToBrush(plotColor);
-
-
-                double[] values = csvData.ParameterValues[columnIndex];
-
-
-                Scatter scatter = PlotControl.Plot.Add.Scatter(csvData.TimeMilliseconds, values);
-
-                scatter.Color = plotColor;
-
+                scatter.Color =
+                    GetPlotColor(parameterIndex);
 
                 scatter.LineWidth = 1;
 
-
-                var parameter = new ParameterInfo
-                {
-                    ColumnIndex = columnIndex,
-
-                    Name = parameterName,
-
-                    UiColor = uiColor,
-
-                    Plot = scatter
-                };
-
-                _parameters.Add(parameter);
-
-                //parameter.Plot.IsVisible = false;
-                colorIndex++;
+                parameter.Plot =
+                    scatter;
             }
-
 
             PlotControl.Plot.Axes.AutoScale();
 
             PlotControl.Refresh();
         }
 
-
-        private void CreateParameterPanel()
+        private void CreateStackedPlots()
         {
-            ParameterPanel.Children.Clear();
+            if (csvData == null)
+                return;
 
+            StackedPlotPanel.Children.Clear();
+
+            _stackedPlots.Clear();
+
+            _stackedCursorLines.Clear();
 
             foreach (ParameterInfo parameter in _parameters)
             {
-                Grid row = new Grid();
+                parameter.Plot = null;
 
-
-                row.Margin = new Thickness(0, 0, 0, 6);
-
-
-                row.ColumnDefinitions.Add(new ColumnDefinition
+                if (!_visibleColumnIndexes.Contains(
+                    parameter.ColumnIndex))
                 {
-                    Width = new GridLength(30)
-                });
+                    continue;
+                }
 
+                double[]? values =
+                    GetParameterValues(
+                        parameter.ColumnIndex);
 
-                row.ColumnDefinitions.Add(new ColumnDefinition
+                if (values == null ||
+                    values.Length == 0)
                 {
-                    Width = new GridLength(1, GridUnitType.Star)
-                });
+                    continue;
+                }
 
+                Border border =
+                    new Border();
 
-                row.ColumnDefinitions.Add(new ColumnDefinition
-                {
-                    Width = new GridLength(28)
-                });
+                border.BorderBrush =
+                    Brushes.LightGray;
 
+                border.BorderThickness =
+                    new Thickness(1);
 
-                row.ColumnDefinitions.Add(new ColumnDefinition
-                {
-                    Width =
-                            new GridLength(100)
-                });
+                border.Margin =
+                    new Thickness(0, 0, 0, 5);
 
+                Grid grid =
+                    new Grid();
 
-                CheckBox checkBox = new CheckBox();
+                grid.RowDefinitions.Add(
+                    new RowDefinition
+                    {
+                        Height =
+                            GridLength.Auto
+                    });
 
+                grid.RowDefinitions.Add(
+                    new RowDefinition
+                    {
+                        Height =
+                            new GridLength(220)
+                    });
 
-                checkBox.IsChecked = true;
+                TextBlock title =
+                    new TextBlock();
 
+                title.Text =
+                    parameter.Name;
 
-                checkBox.VerticalAlignment = System.Windows.VerticalAlignment.Center;
+                title.FontWeight =
+                    FontWeights.Bold;
 
+                title.Margin =
+                    new Thickness(5, 3, 5, 3);
 
-                checkBox.Tag = parameter;
+                Grid.SetRow(title, 0);
 
+                grid.Children.Add(title);
 
-                checkBox.Checked += ParameterCheckBox_Changed;
+                WpfPlot plot =
+                    new WpfPlot();
 
+                Grid.SetRow(plot, 1);
 
-                checkBox.Unchecked += ParameterCheckBox_Changed;
+                grid.Children.Add(plot);
 
+                border.Child =
+                    grid;
 
-                TextBlock name = new TextBlock();
+                StackedPlotPanel.Children.Add(
+                    border);
 
+                _stackedPlots.Add(plot);
 
-                name.Text = parameter.Name;
+                var scatter =
+                    plot.Plot.Add.Scatter(
+                        csvData.TimeMilliseconds,
+                        values);
 
+                // Use the parameter's permanent color.
+                int parameterIndex =
+                    _parameters.IndexOf(parameter);
 
-                name.VerticalAlignment = System.Windows.VerticalAlignment.Center;
+                scatter.Color =
+                    GetPlotColor(parameterIndex);
 
+                scatter.LineWidth = 1;
 
-                name.Margin = new Thickness(4, 0, 4, 0);
+                VerticalLine cursorLine =
+                    plot.Plot.Add.VerticalLine(0);
 
+                cursorLine.LineWidth = 1;
 
-                name.TextWrapping = TextWrapping.Wrap;
+                cursorLine.Color =
+                    ScottPlot.Colors.DarkRed;
 
+                _stackedCursorLines.Add(
+                    cursorLine);
 
-                Border colorBox = new Border();
+                plot.MouseMove +=
+                    StackedPlot_MouseMove;
 
+                plot.MouseLeave +=
+                    StackedPlot_MouseLeave;
 
-                colorBox.Width = 20;
+                plot.Plot.Axes.AutoScale();
 
-                colorBox.Height = 20;
+                plot.Refresh();
 
-
-                colorBox.Background = parameter.UiColor;
-
-
-                colorBox.BorderBrush = Brushes.Black;
-
-
-                colorBox.BorderThickness = new Thickness(1);
-
-
-                colorBox.HorizontalAlignment = System.Windows.HorizontalAlignment.Center;
-
-
-                colorBox.VerticalAlignment = System.Windows.VerticalAlignment.Center;
-
-
-                TextBox valueBox = new TextBox();
-
-
-                valueBox.Text = "--";
-
-
-                valueBox.IsReadOnly = true;
-
-
-                valueBox.Height = 25;
-
-
-                valueBox.VerticalContentAlignment = System.Windows.VerticalAlignment.Center;
-
-
-                valueBox.Margin = new Thickness(3, 0, 0, 0);
-
-
-                parameter.CheckBox = checkBox;
-
-
-                parameter.ValueTextBox = valueBox;
-
-
-                Grid.SetColumn(checkBox, 0);
-
-
-                Grid.SetColumn(name, 1);
-
-
-                Grid.SetColumn(colorBox, 2);
-
-
-                Grid.SetColumn(valueBox, 3);
-                checkBox.IsChecked = false;
-
-                row.Children.Add(checkBox);
-
-                row.Children.Add(name);
-
-                row.Children.Add(colorBox);
-
-                row.Children.Add(valueBox);
-
-
-                ParameterPanel.Children.Add(row);
+                parameter.Plot =
+                    scatter;
             }
         }
 
-
-        private void ParameterCheckBox_Changed(object sender, RoutedEventArgs e)
+        private ScottPlot.Color GetPlotColor(
+            int index)
         {
-            if (sender is CheckBox checkBox && checkBox.Tag is ParameterInfo parameter && parameter.Plot != null)
+            return _plotColors[
+                index % _plotColors.Length];
+        }
+
+        private System.Windows.Media.Color ConvertColor(
+            ScottPlot.Color color)
+        {
+            return System.Windows.Media.Color.FromArgb(
+                color.A,
+                color.R,
+                color.G,
+                color.B);
+        }
+
+        private void PlotControl_MouseMove(
+            object sender,
+            MouseEventArgs e)
+        {
+            if (_currentChartType !=
+                ChartType.Superimposed)
             {
-                parameter.Plot.IsVisible = checkBox.IsChecked == true;
+                return;
+            }
+
+            if (csvData == null)
+                return;
+
+            if (csvData.TimeMilliseconds.Length == 0)
+                return;
+
+            DateTime now =
+                DateTime.Now;
+
+            if ((now - _lastMouseMoveTime)
+                .TotalMilliseconds <
+                MouseMoveIntervalMs)
+            {
+                return;
+            }
+
+            _lastMouseMoveTime =
+                now;
+
+            Point position =
+                e.GetPosition(PlotControl);
+
+            try
+            {
+                double scaledX =
+                    position.X * PlotControl.DisplayScale;
+
+                double scaledY =
+                    position.Y * PlotControl.DisplayScale;
+
+                var coordinates =
+                    PlotControl.Plot.GetCoordinates(
+                        new Pixel(
+                            scaledX,
+                            scaledY));
+
+                double mouseTime =
+                    coordinates.X;
+
+                int index =
+                    FindNearestTimeIndex(
+                        csvData.TimeMilliseconds,
+                        mouseTime);
+
+                if (index < 0 ||
+                    index >=
+                    csvData.TimeMilliseconds.Length)
+                {
+                    return;
+                }
+
+                if (verticalCursorLine != null)
+                {
+                    verticalCursorLine.X =
+                        mouseTime;
+                }
+
+                UpdateCursorInformation(index);
 
                 PlotControl.Refresh();
             }
+            catch
+            {
+            }
         }
 
 
-        private void PlotControl_MouseMove(object sender, MouseEventArgs e)
+
+        private void StackedPlot_MouseMove(
+            object sender,
+            MouseEventArgs e)
         {
-            if (csvData == null || csvData.RowCount == 0)
+            if (_currentChartType !=
+                ChartType.Stacked)
             {
                 return;
             }
 
+            if (csvData == null)
+                return;
 
-            if (_mouseTimer.ElapsedMilliseconds < MouseUpdateMilliseconds)
+            if (csvData.TimeMilliseconds.Length == 0)
+                return;
+
+            if (sender is not WpfPlot currentPlot)
+                return;
+
+            DateTime now =
+                DateTime.Now;
+
+            if ((now - _lastMouseMoveTime)
+                .TotalMilliseconds <
+                MouseMoveIntervalMs)
             {
                 return;
             }
 
+            _lastMouseMoveTime =
+                now;
 
-            _mouseTimer.Restart();
+            Point position =
+                e.GetPosition(currentPlot);
+
+            try
+            {
+
+                double scaledX =
+                    position.X * currentPlot.DisplayScale;
+
+                double scaledY =
+                    position.Y * currentPlot.DisplayScale;
+
+                var coordinates =
+                    currentPlot.Plot.GetCoordinates(
+                        new Pixel(
+                            scaledX,
+                            scaledY));
+
+                double mouseTime =
+                    coordinates.X;
+
+                int index =
+                    FindNearestTimeIndex(
+                        csvData.TimeMilliseconds,
+                        mouseTime);
+
+                if (index < 0 ||
+                    index >=
+                    csvData.TimeMilliseconds.Length)
+                {
+                    return;
+                }
 
 
-            Point mousePosition = e.GetPosition(PlotControl);
+                foreach (VerticalLine cursorLine
+                         in _stackedCursorLines)
+                {
+                    cursorLine.X =
+                        mouseTime;
+                }
+
+                UpdateCursorInformation(index);
+
+                foreach (WpfPlot plot
+                         in _stackedPlots)
+                {
+                    plot.Refresh();
+                }
+            }
+            catch
+            {
+            }
+        }
 
 
-            Coordinates coordinates = PlotControl.Plot.GetCoordinates(
-                    new Pixel(
-                        (float)mousePosition.X,
-                        (float)mousePosition.Y));
 
+        private void StackedPlot_MouseLeave(
+            object sender,
+            MouseEventArgs e)
+        {
+        }
 
-            double mouseTime = coordinates.X;
-
-
-            int nearestIndex = FindNearestTimeIndex(
-                    csvData.TimeMilliseconds,
-                    mouseTime);
-
-
-            if (nearestIndex < 0)
+        private void UpdateCursorInformation(
+            int index)
+        {
+            if (csvData == null)
                 return;
 
-
-            double nearestTime = csvData.TimeMilliseconds[nearestIndex];
-
-
-            if (verticalCursorLine != null)
+            if (index < 0 ||
+                index >=
+                csvData.TimeMilliseconds.Length)
             {
-                verticalCursorLine.X = nearestTime;
-
-                verticalCursorLine.IsVisible = true;
+                return;
             }
 
+            double actualTime =
+                csvData.TimeMilliseconds[index];
 
-            if (nearestIndex < csvData.OriginalTimeStrings.Length)
+            if (index <
+                csvData.OriginalTimeStrings.Length)
             {
-                CursorTimeTextBox.Text = csvData.OriginalTimeStrings[nearestIndex];
-                CursorRecordTextBox.Text = csvData.CurrentRow[nearestIndex];
+                CursorTimeTextBox.Text =
+                    csvData.OriginalTimeStrings[index];
+            }
+            else
+            {
+                CursorTimeTextBox.Text =
+                    actualTime.ToString("0.###");
             }
 
+            if (index <
+                csvData.CurrentRow.Length)
+            {
+                CursorRecordTextBox.Text =
+                    csvData.CurrentRow[index];
+            }
+            else
+            {
+                CursorRecordTextBox.Text =
+                    index.ToString();
+            }
 
-            foreach (ParameterInfo parameter in _parameters)
+            foreach (ParameterInfo parameter
+                     in _parameters)
             {
                 if (parameter.ValueTextBox == null)
                     continue;
 
-
-                double[] values = csvData.ParameterValues[
-                        parameter.ColumnIndex];
-
-
-                if (nearestIndex >= values.Length)
+                if (!csvData.ParameterValues.ContainsKey(
+                    parameter.ColumnIndex))
                 {
-                    parameter.ValueTextBox.Text = "--";
+                    parameter.ValueTextBox.Text =
+                        "--";
 
                     continue;
                 }
 
+                double[]? values =
+                    GetParameterValues(
+                        parameter.ColumnIndex);
 
-                double value = values[nearestIndex];
-
-
-                if (double.IsNaN(value) ||
-                    double.IsInfinity(value))
+                if (values == null)
                 {
-                    parameter.ValueTextBox.Text = "--";
+                    parameter.ValueTextBox.Text =
+                        "--";
+
+                    continue;
+                }
+
+                if (index < values.Length)
+                {
+                    double value =
+                        values[index];
+
+                    if (double.IsNaN(value))
+                    {
+                        parameter.ValueTextBox.Text =
+                            "NaN";
+                    }
+                    else
+                    {
+                        parameter.ValueTextBox.Text =
+                            value.ToString("0.#####");
+                    }
                 }
                 else
                 {
                     parameter.ValueTextBox.Text =
-                        value.ToString("G10");
+                        "--";
                 }
             }
-
-            PlotControl.Refresh();
         }
 
-
-        private void PlotControl_MouseLeave(object sender, MouseEventArgs e)
+        private void PlotControl_MouseLeave(
+            object sender,
+            MouseEventArgs e)
         {
             if (verticalCursorLine != null)
             {
-                verticalCursorLine.IsVisible = true;
+                verticalCursorLine.IsVisible =
+                    true;
 
                 PlotControl.Refresh();
             }
         }
 
-
-        private static int FindNearestTimeIndex(double[] times, double target)
+        private int FindNearestTimeIndex(
+            double[] values,
+            double target)
         {
-            if (times.Length == 0)
+            if (values == null ||
+                values.Length == 0)
+            {
                 return -1;
+            }
 
-
-            if (target <= times[0])
+            if (target <= values[0])
                 return 0;
 
-
-            if (target >= times[times.Length - 1])
+            if (target >=
+                values[values.Length - 1])
             {
-                return times.Length - 1;
+                return values.Length - 1;
             }
 
+            int low = 0;
+            int high =
+                values.Length - 1;
 
-            int left = 0;
-
-            int right = times.Length - 1;
-
-
-            while (left <= right)
+            while (low <= high)
             {
-                int middle = left + ((right - left) / 2);
+                int mid =
+                    low +
+                    (high - low) / 2;
 
+                double value =
+                    values[mid];
 
-                if (times[middle] == target)
-                {
-                    return middle;
-                }
+                if (value == target)
+                    return mid;
 
-
-                if (times[middle] < target)
-                {
-                    left = middle + 1;
-                }
+                if (value < target)
+                    low = mid + 1;
                 else
-                {
-                    right = middle - 1;
-                }
+                    high = mid - 1;
             }
 
+            if (low >= values.Length)
+                return values.Length - 1;
 
-            int index1 = Math.Max(0, right);
+            if (high < 0)
+                return 0;
 
+            double differenceLow =
+                Math.Abs(
+                    values[low] -
+                    target);
 
-            int index2 = Math.Min(times.Length - 1, left);
+            double differenceHigh =
+                Math.Abs(
+                    values[high] -
+                    target);
 
+            if (differenceLow <
+                differenceHigh)
+            {
+                return low;
+            }
 
-            double difference1 = Math.Abs(times[index1] - target);
-
-
-            double difference2 = Math.Abs(times[index2] - target);
-
-
-            return difference1 <= difference2
-                ? index1
-                : index2;
+            return high;
         }
 
-
-        private static Brush ConvertScottPlotColorToBrush(ScottPlot.Color color)
+        private void StandardTime_Checked(
+            object sender,
+            RoutedEventArgs e)
         {
-            return new SolidColorBrush(
-                System.Windows.Media.Color.FromArgb(
-                    color.Alpha,
-                    color.Red,
-                    color.Green,
-                    color.Blue));
+            NormTime = false;
+
+            if (csvData != null)
+                CreatePlots();
+        }
+
+        private void NormalisedTime_Checked(
+            object sender,
+            RoutedEventArgs e)
+        {
+            NormTime = true;
+
+            if (csvData != null)
+                CreatePlots();
+        }
+
+        private double[]? GetParameterValues(
+            int columnIndex)
+        {
+            if (csvData == null)
+                return null;
+
+            if (NormTime)
+            {
+             
+                if (csvData.ParameterValues.ContainsKey(
+                    columnIndex))
+                {
+                    return csvData.ParameterValues[
+                        columnIndex];
+                }
+            }
+            else
+            {
+             
+                if (csvData.ParameterValuesDisplay.ContainsKey(
+                    columnIndex))
+                {
+                    return csvData.ParameterValuesDisplay[
+                        columnIndex];
+                }
+            }
+            return null;
         }
     }
 }

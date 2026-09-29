@@ -1,6 +1,7 @@
-﻿using System.Windows.Controls;
+﻿using ScottPlot.Plottables;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
-using ScottPlot.Plottables;
 
 namespace CsvPlotter.Models
 {
@@ -17,5 +18,8 @@ namespace CsvPlotter.Models
         public Brush? UiColor { get; set; }
 
         public Scatter? Plot { get; set; }
+        public Grid? ParameterRow { get; set; }
+
+        public CheckBox? FilterCheckBox { get; set; }
     }
 }
