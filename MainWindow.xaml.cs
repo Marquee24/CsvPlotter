@@ -1,10 +1,8 @@
-﻿
-using CsvPlotter.Models;
+﻿using CsvPlotter.Models;
 using CsvPlotter.Services;
 using Microsoft.Win32;
 using ScottPlot;
 using ScottPlot.Plottables;
-using ScottPlot.TickGenerators.TimeUnits;
 using ScottPlot.WPF;
 using System.Diagnostics;
 using System.IO;
@@ -19,8 +17,9 @@ namespace CsvPlotter
     {
         private CsvPlotData? csvData;
 
-        private readonly List<int> _loadedColumnIndexes =
-            new List<int>();
+
+    private readonly List<int> _loadedColumnIndexes =
+        new List<int>();
 
         private readonly HashSet<int> _visibleColumnIndexes =
             new HashSet<int>();
@@ -57,25 +56,32 @@ namespace CsvPlotter
 
         private readonly ScottPlot.Color[] _plotColors =
         {
-            ScottPlot.Colors.Blue,
-            ScottPlot.Colors.Red,
-            ScottPlot.Colors.Green,
-            ScottPlot.Colors.Orange,
-            ScottPlot.Colors.Purple,
-            ScottPlot.Colors.Brown,
-            ScottPlot.Colors.Magenta,
-            ScottPlot.Colors.Cyan,
-            ScottPlot.Colors.DarkBlue,
-            ScottPlot.Colors.DarkRed
-        };
+        ScottPlot.Colors.Blue,
+        ScottPlot.Colors.Red,
+        ScottPlot.Colors.Green,
+        ScottPlot.Colors.Orange,
+        ScottPlot.Colors.Purple,
+        ScottPlot.Colors.Brown,
+        ScottPlot.Colors.Magenta,
+        ScottPlot.Colors.Cyan,
+        ScottPlot.Colors.DarkBlue,
+        ScottPlot.Colors.DarkRed
+    };
 
         public MainWindow()
         {
             InitializeComponent();
 
-            PlotControl.MouseMove += PlotControl_MouseMove;
-            PlotControl.MouseLeave += PlotControl_MouseLeave;
+            PlotControl.MouseMove +=
+                PlotControl_MouseMove;
+
+            PlotControl.MouseLeave +=
+                PlotControl_MouseLeave;
         }
+
+        // =========================================================
+        // BROWSE CSV
+        // =========================================================
 
         private void BrowseButton_Click(
             object sender,
@@ -95,11 +101,15 @@ namespace CsvPlotter
 
             try
             {
-                var allLines = File.ReadLines(dialog.FileName);
+                var allLines =
+                    File.ReadLines(dialog.FileName);
 
-                int lineCount = allLines.Count();
+                int lineCount =
+                    allLines.Count();
 
-                MaxRowsTextBox.Text = lineCount.ToString();
+                MaxRowsTextBox.Text =
+                    lineCount.ToString();
+
                 MinRowsTextBox.Text = "0";
 
                 string firstLine =
@@ -153,6 +163,13 @@ namespace CsvPlotter
 
                 CreateParameterPanel();
 
+                csvData = null;
+
+                ClearAllPlots();
+
+                CursorTimeTextBox.Text = "--";
+                CursorRecordTextBox.Text = "--";
+
                 StatusText.Text =
                     $"CSV selected: {lineCount:N0} rows, " +
                     $"{columnCount - 1} parameters";
@@ -167,10 +184,11 @@ namespace CsvPlotter
             }
         }
 
-        private async void LoadButton_Click(
-            object sender,
-            RoutedEventArgs e)
+     
+
+        private async Task LoadCsvData()
         {
+
             if (string.IsNullOrWhiteSpace(
                 FilePathTextBox.Text))
             {
@@ -206,17 +224,31 @@ namespace CsvPlotter
                 minRows = 0;
             }
 
-            int Resolution = 1000;
+            int resolution = 1000;
 
             if (!int.TryParse(
                 ResolutionTextBox.Text,
-                out Resolution))
+                out resolution))
             {
-                Resolution = 1000;
+                resolution = 1000;
             }
 
-            if (Resolution <= 0)
-                Resolution = 1000;
+            if (resolution <= 0)
+                resolution = 1000;
+
+            if (minRows < 0)
+                minRows = 0;
+
+            if (maxRows < minRows)
+            {
+                MessageBox.Show(
+                    "Max row must be greater than or equal to Min row.",
+                    "Invalid Range",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+
+                return;
+            }
 
             StatusText.Text =
                 "Loading CSV...";
@@ -242,34 +274,20 @@ namespace CsvPlotter
                             selectedColumns,
                             maxRows,
                             minRows,
-                            Resolution));
+                            resolution));
 
                 stopwatch.Stop();
 
                 csvData = data;
 
-                _visibleColumnIndexes.Clear();
 
-                foreach (ParameterInfo parameter
-                         in _parameters)
-                {
-                    if (parameter.CheckBox != null)
-                        parameter.CheckBox.IsChecked = false;
-
-                    if (parameter.FilterCheckBox != null)
-                        parameter.FilterCheckBox.IsChecked = false;
-
-                    if (parameter.ParameterRow != null)
-                        parameter.ParameterRow.Visibility =
-                            Visibility.Collapsed;
-
-                    parameter.Plot = null;
-                }
 
                 ClearAllPlots();
 
                 CursorTimeTextBox.Text = "--";
                 CursorRecordTextBox.Text = "--";
+
+                CreatePlots();
 
                 StatusText.Text =
                     $"Loaded {csvData.RowCount:N0} plot points " +
@@ -293,6 +311,60 @@ namespace CsvPlotter
                 BrowseButton.IsEnabled = true;
             }
         }
+
+        private async void LoadButton_Click(
+    object sender,
+    RoutedEventArgs e)
+        {
+            await LoadCsvData();
+        }
+
+
+
+private async void ResetRangeButton_Click(
+    object sender,
+    RoutedEventArgs e)
+        {
+            
+            MinRowsTextBox.Text = "0";
+
+            if (_csvColumnNames.Count > 0 &&
+                !string.IsNullOrWhiteSpace(FilePathTextBox.Text))
+            {
+                try
+                {
+                    int totalRows =
+                        File.ReadLines(FilePathTextBox.Text).Count() - 1;
+
+                    if (totalRows > 0)
+                    {
+                        MaxRowsTextBox.Text =
+                            totalRows.ToString();
+                    }
+                    else
+                    {
+                        MaxRowsTextBox.Text = "2000";
+                    }
+                }
+                catch
+                {
+                    MaxRowsTextBox.Text = "2000";
+                }
+            }
+            else
+            {
+                MaxRowsTextBox.Text = "2000";
+            }
+
+           
+            await LoadCsvData();
+
+            StatusText.Text =
+                "Range reset and full CSV range loaded.";
+        }
+
+
+
 
         private void CreateParameterPanel()
         {
@@ -347,8 +419,7 @@ namespace CsvPlotter
                 parameterCheckBox.VerticalAlignment =
                     System.Windows.VerticalAlignment.Center;
 
-                parameterCheckBox.IsChecked =
-                    false;
+                parameterCheckBox.IsChecked = false;
 
                 Grid.SetColumn(
                     parameterCheckBox,
@@ -412,17 +483,10 @@ namespace CsvPlotter
                     valueTextBox,
                     3);
 
-                row.Children.Add(
-                    parameterCheckBox);
-
-                row.Children.Add(
-                    colorBorder);
-
-                row.Children.Add(
-                    nameText);
-
-                row.Children.Add(
-                    valueTextBox);
+                row.Children.Add(parameterCheckBox);
+                row.Children.Add(colorBorder);
+                row.Children.Add(nameText);
+                row.Children.Add(valueTextBox);
 
                 row.Visibility =
                     Visibility.Collapsed;
@@ -430,17 +494,10 @@ namespace CsvPlotter
                 ParameterInfo parameter =
                     new ParameterInfo
                     {
-                        ColumnIndex =
-                            columnIndex,
-
-                        Name =
-                            parameterName,
-
-                        CheckBox =
-                            parameterCheckBox,
-
-                        ValueTextBox =
-                            valueTextBox,
+                        ColumnIndex = columnIndex,
+                        Name = parameterName,
+                        CheckBox = parameterCheckBox,
+                        ValueTextBox = valueTextBox,
 
                         UiColor =
                             new SolidColorBrush(
@@ -448,9 +505,7 @@ namespace CsvPlotter
                                     GetPlotColor(
                                         _parameters.Count))),
 
-                        ParameterRow =
-                            row,
-
+                        ParameterRow = row,
                         Plot = null
                     };
 
@@ -473,8 +528,7 @@ namespace CsvPlotter
                 filterCheckBox.Margin =
                     new Thickness(2, 3, 2, 3);
 
-                filterCheckBox.IsChecked =
-                    false;
+                filterCheckBox.IsChecked = false;
 
                 parameter.FilterCheckBox =
                     filterCheckBox;
@@ -510,6 +564,10 @@ namespace CsvPlotter
 
             return $"Parameter {columnIndex}";
         }
+
+        // =========================================================
+        // FILTER
+        // =========================================================
 
         private void Filter_Click(
             object sender,
@@ -589,8 +647,7 @@ namespace CsvPlotter
 
                 if (parameter.CheckBox != null)
                 {
-                    parameter.CheckBox.IsChecked =
-                        true;
+                    parameter.CheckBox.IsChecked = true;
                 }
             }
             else
@@ -603,8 +660,7 @@ namespace CsvPlotter
 
                 if (parameter.CheckBox != null)
                 {
-                    parameter.CheckBox.IsChecked =
-                        false;
+                    parameter.CheckBox.IsChecked = false;
                 }
             }
         }
@@ -639,6 +695,10 @@ namespace CsvPlotter
             CreatePlots();
         }
 
+        // =========================================================
+        // CHART TYPE
+        // =========================================================
+
         private void ChartTypeComboBox_SelectionChanged(
             object sender,
             SelectionChangedEventArgs e)
@@ -659,6 +719,10 @@ namespace CsvPlotter
 
             CreatePlots();
         }
+
+        // =========================================================
+        // CREATE PLOTS
+        // =========================================================
 
         private void CreatePlots()
         {
@@ -710,7 +774,6 @@ namespace CsvPlotter
             }
 
             _stackedPlots.Clear();
-
             _stackedCursorLines.Clear();
 
             foreach (ParameterInfo parameter
@@ -719,6 +782,10 @@ namespace CsvPlotter
                 parameter.Plot = null;
             }
         }
+
+        // =========================================================
+        // SUPERIMPOSED PLOT
+        // =========================================================
 
         private void CreateSuperimposedPlot()
         {
@@ -735,7 +802,8 @@ namespace CsvPlotter
             verticalCursorLine.Color =
                 ScottPlot.Colors.DarkRed;
 
-            foreach (ParameterInfo parameter in _parameters)
+            foreach (ParameterInfo parameter
+                     in _parameters)
             {
                 parameter.Plot = null;
 
@@ -760,8 +828,6 @@ namespace CsvPlotter
                         csvData.TimeMilliseconds,
                         values);
 
-                // Keep the parameter's original color
-                // regardless of selection order.
                 int parameterIndex =
                     _parameters.IndexOf(parameter);
 
@@ -779,6 +845,10 @@ namespace CsvPlotter
             PlotControl.Refresh();
         }
 
+        // =========================================================
+        // STACKED PLOTS
+        // =========================================================
+
         private void CreateStackedPlots()
         {
             if (csvData == null)
@@ -787,10 +857,10 @@ namespace CsvPlotter
             StackedPlotPanel.Children.Clear();
 
             _stackedPlots.Clear();
-
             _stackedCursorLines.Clear();
 
-            foreach (ParameterInfo parameter in _parameters)
+            foreach (ParameterInfo parameter
+                     in _parameters)
             {
                 parameter.Plot = null;
 
@@ -855,8 +925,7 @@ namespace CsvPlotter
 
                 grid.Children.Add(title);
 
-                WpfPlot plot =
-                    new WpfPlot();
+                WpfPlot plot =new WpfPlot();
 
                 Grid.SetRow(plot, 1);
 
@@ -875,7 +944,6 @@ namespace CsvPlotter
                         csvData.TimeMilliseconds,
                         values);
 
-                // Use the parameter's permanent color.
                 int parameterIndex =
                     _parameters.IndexOf(parameter);
 
@@ -901,6 +969,9 @@ namespace CsvPlotter
                 plot.MouseLeave +=
                     StackedPlot_MouseLeave;
 
+                plot.MouseDown +=
+                    StackedPlot_MouseDown;
+
                 plot.Plot.Axes.AutoScale();
 
                 plot.Refresh();
@@ -909,6 +980,29 @@ namespace CsvPlotter
                     scatter;
             }
         }
+
+
+        private void StackedPlotScrollViewer_PreviewMouseWheel(
+            object sender,
+            MouseWheelEventArgs e)
+        {
+            DependencyObject source = e.OriginalSource as DependencyObject;
+
+          
+            while (source != null)
+            {
+                if (source is WpfPlot)
+                {
+                    e.Handled = true;
+                    return;
+                }
+
+                source = VisualTreeHelper.GetParent(source);
+            }
+         
+        }
+
+
 
         private ScottPlot.Color GetPlotColor(
             int index)
@@ -933,9 +1027,7 @@ namespace CsvPlotter
         {
             if (_currentChartType !=
                 ChartType.Superimposed)
-            {
                 return;
-            }
 
             if (csvData == null)
                 return;
@@ -953,8 +1045,7 @@ namespace CsvPlotter
                 return;
             }
 
-            _lastMouseMoveTime =
-                now;
+            _lastMouseMoveTime = now;
 
             Point position =
                 e.GetPosition(PlotControl);
@@ -962,10 +1053,12 @@ namespace CsvPlotter
             try
             {
                 double scaledX =
-                    position.X * PlotControl.DisplayScale;
+                    position.X *
+                    PlotControl.DisplayScale;
 
                 double scaledY =
-                    position.Y * PlotControl.DisplayScale;
+                    position.Y *
+                    PlotControl.DisplayScale;
 
                 var coordinates =
                     PlotControl.Plot.GetCoordinates(
@@ -1003,17 +1096,14 @@ namespace CsvPlotter
             }
         }
 
-
-
+        
         private void StackedPlot_MouseMove(
             object sender,
             MouseEventArgs e)
         {
             if (_currentChartType !=
                 ChartType.Stacked)
-            {
                 return;
-            }
 
             if (csvData == null)
                 return;
@@ -1034,20 +1124,20 @@ namespace CsvPlotter
                 return;
             }
 
-            _lastMouseMoveTime =
-                now;
+            _lastMouseMoveTime = now;
 
             Point position =
                 e.GetPosition(currentPlot);
 
             try
             {
-
                 double scaledX =
-                    position.X * currentPlot.DisplayScale;
+                    position.X *
+                    currentPlot.DisplayScale;
 
                 double scaledY =
-                    position.Y * currentPlot.DisplayScale;
+                    position.Y *
+                    currentPlot.DisplayScale;
 
                 var coordinates =
                     currentPlot.Plot.GetCoordinates(
@@ -1070,7 +1160,6 @@ namespace CsvPlotter
                     return;
                 }
 
-
                 foreach (VerticalLine cursorLine
                          in _stackedCursorLines)
                 {
@@ -1091,13 +1180,136 @@ namespace CsvPlotter
             }
         }
 
-
-
         private void StackedPlot_MouseLeave(
             object sender,
             MouseEventArgs e)
         {
         }
+
+        // =========================================================
+        // LEFT / RIGHT CLICK RANGE SELECTION
+        // =========================================================
+
+        private void PlotControl_MouseDown(
+            object sender,
+            MouseButtonEventArgs e)
+        {
+            if (_currentChartType !=
+                ChartType.Superimposed)
+                return;
+
+            SelectRangeFromMouse(
+                PlotControl,
+                e);
+        }
+
+        private void StackedPlot_MouseDown(
+            object sender,
+            MouseButtonEventArgs e)
+        {
+            if (_currentChartType !=
+                ChartType.Stacked)
+                return;
+
+            if (sender is not WpfPlot plot)
+                return;
+
+            SelectRangeFromMouse(
+                plot,
+                e);
+        }
+
+        private void SelectRangeFromMouse(
+            WpfPlot plot,
+            MouseButtonEventArgs e)
+        {
+            if (csvData == null)
+                return;
+
+            if (csvData.TimeMilliseconds.Length == 0)
+                return;
+
+            if (e.ChangedButton != MouseButton.Left &&
+                e.ChangedButton != MouseButton.Right)
+            {
+                return;
+            }
+
+            Point position =
+                e.GetPosition(plot);
+
+            try
+            {
+                double scaledX =
+                    position.X *
+                    plot.DisplayScale;
+
+                double scaledY =
+                    position.Y *
+                    plot.DisplayScale;
+
+                var coordinates =
+                    plot.Plot.GetCoordinates(
+                        new Pixel(
+                            scaledX,
+                            scaledY));
+
+                int index =
+                    FindNearestTimeIndex(
+                        csvData.TimeMilliseconds,
+                        coordinates.X);
+
+                if (index < 0 ||
+                    index >=
+                    csvData.TimeMilliseconds.Length)
+                {
+                    return;
+                }
+
+                if (index >=
+                    csvData.CurrentRow.Length)
+                {
+                    return;
+                }
+
+                string selectedRow =
+                    csvData.CurrentRow[index];
+
+                // LEFT CLICK = MIN ROW
+                if (e.ChangedButton ==
+                    MouseButton.Left)
+                {
+                    MinRowsTextBox.Text =
+                        selectedRow;
+
+                    StatusText.Text =
+                        $"Min selected: row {selectedRow}";
+                }
+
+                // RIGHT CLICK = MAX ROW
+                else if (e.ChangedButton ==
+                         MouseButton.Right)
+                {
+                    MaxRowsTextBox.Text =
+                        selectedRow;
+
+                    StatusText.Text =
+                        $"Max selected: row {selectedRow}";
+                }
+
+                // IMPORTANT:
+                // We do NOT reload or replot here.
+                // The user must click LOAD.
+                e.Handled = true;
+            }
+            catch
+            {
+            }
+        }
+
+        // =========================================================
+        // CURSOR INFORMATION
+        // =========================================================
 
         private void UpdateCursorInformation(
             int index)
@@ -1127,6 +1339,9 @@ namespace CsvPlotter
                     actualTime.ToString("0.###");
             }
 
+            // Show the exact CurrentRow value.
+            // This is the same value used by
+            // left/right mouse click.
             if (index <
                 csvData.CurrentRow.Length)
             {
@@ -1144,15 +1359,6 @@ namespace CsvPlotter
             {
                 if (parameter.ValueTextBox == null)
                     continue;
-
-                if (!csvData.ParameterValues.ContainsKey(
-                    parameter.ColumnIndex))
-                {
-                    parameter.ValueTextBox.Text =
-                        "--";
-
-                    continue;
-                }
 
                 double[]? values =
                     GetParameterValues(
@@ -1196,12 +1402,15 @@ namespace CsvPlotter
         {
             if (verticalCursorLine != null)
             {
-                verticalCursorLine.IsVisible =
-                    true;
+                verticalCursorLine.IsVisible = true;
 
                 PlotControl.Refresh();
             }
         }
+
+        // =========================================================
+        // FIND NEAREST TIME INDEX
+        // =========================================================
 
         private int FindNearestTimeIndex(
             double[] values,
@@ -1223,6 +1432,7 @@ namespace CsvPlotter
             }
 
             int low = 0;
+
             int high =
                 values.Length - 1;
 
@@ -1269,6 +1479,10 @@ namespace CsvPlotter
             return high;
         }
 
+        // =========================================================
+        // STANDARD VALUES
+        // =========================================================
+
         private void StandardTime_Checked(
             object sender,
             RoutedEventArgs e)
@@ -1278,6 +1492,10 @@ namespace CsvPlotter
             if (csvData != null)
                 CreatePlots();
         }
+
+        // =========================================================
+        // NORMALISED VALUES
+        // =========================================================
 
         private void NormalisedTime_Checked(
             object sender,
@@ -1297,7 +1515,6 @@ namespace CsvPlotter
 
             if (NormTime)
             {
-             
                 if (csvData.ParameterValues.ContainsKey(
                     columnIndex))
                 {
@@ -1307,7 +1524,6 @@ namespace CsvPlotter
             }
             else
             {
-             
                 if (csvData.ParameterValuesDisplay.ContainsKey(
                     columnIndex))
                 {
@@ -1315,7 +1531,10 @@ namespace CsvPlotter
                         columnIndex];
                 }
             }
+
             return null;
         }
     }
+
+
 }
