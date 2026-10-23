@@ -48,7 +48,6 @@ namespace CsvPlotter
             new List<VerticalLine>();
 
         public static bool NormTime = true;
-
         private DateTime _lastMouseMoveTime =
             DateTime.MinValue;
 
@@ -916,7 +915,7 @@ namespace CsvPlotter
                     new RowDefinition
                     {
                         Height =
-                            new GridLength(150)
+                            new GridLength(100)
                     });
 
                 TextBlock title =
@@ -1307,6 +1306,25 @@ namespace CsvPlotter
 
                     StatusText.Text =
                         $"Min selected: row {selectedRow}";
+
+                    //------------------------
+
+                    foreach (ParameterInfo parameter
+                             in _parameters)
+                    {
+                        VerticalLine cursorLine =
+                            plot.Plot.Add.VerticalLine(csvData.TimeMilliseconds[index]);
+
+                        cursorLine.LineWidth = 1;
+
+                        cursorLine.Color =
+                            ScottPlot.Colors.Black;
+
+                        //_stackedCursorLines.Add(
+                        //    cursorLine);
+
+                    }
+                    //------------------------
                 }
 
                 // RIGHT CLICK = MAX ROW
