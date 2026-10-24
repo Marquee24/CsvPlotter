@@ -16,7 +16,8 @@ namespace CsvPlotter
     public partial class MainWindow : Window
     {
         private CsvPlotData? csvData;
-
+        
+        public static double minTime = 99999999999;
 
         private readonly List<int> _loadedColumnIndexes =
             new List<int>();
@@ -795,7 +796,7 @@ namespace CsvPlotter
             PlotControl.Plot.Clear();
 
             verticalCursorLine =
-                PlotControl.Plot.Add.VerticalLine(0);
+                PlotControl.Plot.Add.VerticalLine(minTime);
 
             verticalCursorLine.LineWidth = 1;
 
@@ -849,6 +850,10 @@ namespace CsvPlotter
                     scatter;
             }
 
+            if (verticalCursorLine != null)
+            {
+                verticalCursorLine.X = minTime;
+            }
             PlotControl.Plot.Axes.AutoScale();
 
             //PlotControl.Refresh();
@@ -975,7 +980,7 @@ namespace CsvPlotter
                 scatter.MarkerSize = 1;
 
                 VerticalLine cursorLine =
-                    plot.Plot.Add.VerticalLine(0);
+                    plot.Plot.Add.VerticalLine(minTime);
 
                 cursorLine.LineWidth = 1;
 

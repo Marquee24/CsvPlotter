@@ -83,6 +83,10 @@ namespace CsvPlotter.Services
                             if (double.IsNaN(time))
                                 continue;
 
+                            if (time < MainWindow.minTime)
+                            {
+                                MainWindow.minTime = time;
+                            }
                             timeList.Add(time);
                             currRowList.Add((rowCount - 1).ToString());
                             originalTimeList.Add(timeString);
