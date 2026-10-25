@@ -54,7 +54,7 @@ namespace CsvPlotter.Services
                 int avgFactor = 0;
                 double[,] values_1 = new double[selectedColumnIndexes.Length, avgFactor_1];
                 double[,] values_2 = new double[selectedColumnIndexes.Length, avgFactor_2];
-
+                MainWindow.minTime = 99999999999;
                 while (csv.Read())
                 {
                     if ((maxRows - minRows) > 0 && rowCount >= maxRows)

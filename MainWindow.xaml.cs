@@ -17,7 +17,7 @@ namespace CsvPlotter
     {
         private CsvPlotData? csvData;
         
-        public static double minTime = 99999999999;
+        public static double minTime = 0;
 
         private readonly List<int> _loadedColumnIndexes =
             new List<int>();
