@@ -920,7 +920,7 @@ namespace CsvPlotter
                     new RowDefinition
                     {
                         Height =
-                            new GridLength(100)
+                            new GridLength(200)
                     });
 
                 TextBlock title =
