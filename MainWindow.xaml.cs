@@ -1314,11 +1314,11 @@ namespace CsvPlotter
 
                     //------------------------
 
-                    foreach (ParameterInfo parameter
-                             in _parameters)
+                    foreach (WpfPlot stackedPlot
+                             in _stackedPlots)
                     {
                         VerticalLine cursorLine =
-                            plot.Plot.Add.VerticalLine(csvData.TimeMilliseconds[index]);
+                            stackedPlot.Plot.Add.VerticalLine(csvData.TimeMilliseconds[index]);
 
                         cursorLine.LineWidth = 1;
 
